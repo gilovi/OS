@@ -1,0 +1,49 @@
+login1, gilovi
+Student Name1 (ID1), 300604493
+EX: 1
+
+FILES:
+
+
+REMARKS:
+
+
+ANSWERS:
+
+Task 1:
+
+the output for strace WhatIDo is:
+
+mkdir("os", 0775)                       = 0
+-created a new directory named 'os', with user and group premissions to read,write and execute. and to other to read and execute. 
+
+mkdir("os/2015", 0775)                  = 0
+-created a new subdirectory '2015' under'os' , with user and group premissions to read,write and execute. and to other to read and execute. 
+
+brk(0)                                  = 0x1ac1000
+-sets the end of the data segment to 0 (at 0x1ac1000)
+
+brk(0x1ae2000) 				= 0x1ae2000
+-allocates more memory so the end of the data segment is now 0x1ae2000
+ 
+                        
+open("os/2015/info", O_WRONLY|O_CREAT|O_TRUNC, 0666) = 3
+-opens the file 'os/2015/info' 
+
+	WRONLY - the file has write only access permission
+	CREAT - creates the file even though it didnt exsisted
+	TRUNC - file truncated to length 0.
+	0666 - the file gets the read and write permissions for oner group and other.
+
+fstat(3, {st_mode=S_IFREG|0644, st_size=0, ...}) = 0
+-
+
+mmap(NULL, 65536, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f68758b3000
+write(3, "                                "..., 119) = 119
+close(3)                                = 0
+munmap(0x7f68758b3000, 65536)           = 0
+unlink("os/2015/info")                  = 0
+rmdir("os/2015/")                       = 0
+rmdir("os/")                            = 0
+exit_group(0)                           = ?
+

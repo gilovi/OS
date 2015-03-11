@@ -11,6 +11,7 @@ REMARKS:
 ANSWERS:
 
 Task 1:
+=========================================
 
 the output for strace WhatIDo is:
 
@@ -46,4 +47,10 @@ unlink("os/2015/info")                  = 0
 rmdir("os/2015/")                       = 0
 rmdir("os/")                            = 0
 exit_group(0)                           = ?
+
+
+
+
+Task 2:
+=========================================
 

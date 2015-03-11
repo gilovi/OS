@@ -53,4 +53,10 @@ exit_group(0)                           = ?
 
 Task 2:
 =========================================
+1. Interrupt handling can result in unwanted behaviour of the program, two possible side-effects are:
+  a. When 2 programs try to write to the same file simultanously (e.g. program #1 started writing to the file, an interupt occurs, and program #2 starts writing to file), the end result may not be what the programmer intended. For example, the written file can contain a mixed gibrish of the output from both programs instead of the output from the second program following the output from the first program.
+  b. Interrups add to the total running time of the program (from the moment it is called, until the moment it returns a value), therefore time-based programs (such as a program that records its own running time) may not behave as expected because its "perception" of time will be distorded - due to the time it takes for the OS to return to this program.
+
+2. This does not seem to be a good idea, as it undermines the whole concept of allowing the OS to perform multiple tasks "simultaniously" and efficiently. The implications are that, using this "solution", the running time of the processor running multiple tasks may drastically increase. Furthermore, during the time such a program blocks all interrups, no multi-tasking can be perfomed by the processor, and all programs necessary for operating the computer are halted (the computer is temporarly unusable).
+
 

@@ -29,6 +29,7 @@ brk(0x1ae2000) 				= 0x1ae2000
                         
 open("os/2015/info", O_WRONLY|O_CREAT|O_TRUNC, 0666) = 3
 -opens the file 'os/2015/info' 
+
 	WRONLY - the file has write only access permission
 	CREAT - creates the file even though it didnt exsisted
 	TRUNC - file truncated to length 0.

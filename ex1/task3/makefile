@@ -18,15 +18,15 @@ TARSRCS=$(LIBSRC) Makefile README
 
 all: $(TARGETS)
 
-$(TARGETS): $(LIBOBJ)
-$(AR) $(ARFLAGS) $@ $^
-$(RANLIB) $@
+$(TARGETS):	$(LIBOBJ)
+	$(AR) $(ARFLAGS) $@ $^
+	$(RANLIB) $@
 
 clean:
-$(RM) $(TARGETS) $(OSMLIB) $(OBJ) $(LIBOBJ) *~ *core
+	$(RM) $(TARGETS) $(OSMLIB) $(OBJ) $(LIBOBJ) *~ *core
 
 depend:
-makedepend -- $(CFLAGS) -- $(SRC) $(LIBSRC)
+	makedepend -- $(CFLAGS) -- $(SRC) $(LIBSRC)
 
 tar:
-$(TAR) $(TARFLAGS) $(TARNAME) $(TARSRCS)
+	$(TAR) $(TARFLAGS) $(TARNAME) $(TARSRCS)

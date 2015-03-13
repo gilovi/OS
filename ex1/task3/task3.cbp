@@ -33,6 +33,9 @@
 			<Add option="-fexceptions" />
 		</Compiler>
 		<Unit filename="main.cpp" />
+		<Unit filename="makefile" />
+		<Unit filename="osm.cpp" />
+		<Unit filename="osm.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />

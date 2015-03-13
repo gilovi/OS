@@ -5,7 +5,7 @@ using namespace std;
 
 int main()
 {
-    timeMeasurmentStructure measurements = measureTimes(10000);
+    timeMeasurmentStructure measurements = measureTimes(50000);
     cout<< "machine name: " << measurements.machineName << endl;
     cout<< "instruction time (nanoSeconds): " << measurements.instructionTimeNanoSecond << endl;
     cout<< "empty function call time(nanoSeconds): " << measurements.functionTimeNanoSecond << endl;

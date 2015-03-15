@@ -20,8 +20,10 @@ double osm_operation_time(unsigned int osm_iterations)
     double runningTime = 0;
     int a = 0;
     double avgRunningTime = -1;
-
-    gettimeofday(&t1, NULL);
+    int success1, success2;
+	success1 = 0;
+	success2 = 0;
+    success1 = gettimeofday(&t1, NULL);
     for(unsigned int i = 0; i < iterations; i++)
     {
         a=0;
@@ -35,9 +37,13 @@ double osm_operation_time(unsigned int osm_iterations)
         a=8;
         a=9;
     }
-    gettimeofday(&t2, NULL);
-    runningTime = (t2.tv_usec - t1.tv_usec);    //total time in micro-seconds
-    avgRunningTime = (runningTime/(iterations*ROOLING_FACTOR) )/1000; //average time in nano-seconds
+    success2 = gettimeofday(&t2, NULL);
+    if (success1 == -1 || success2 == -1)
+	{
+		return -1;
+	}
+    runningTime = (t2.tv_sec*(10^6) + t2.tv_usec) - (t1.tv_sec*(10^6) +  t1.tv_usec);    //total time in micro-seconds
+    avgRunningTime = (runningTime/(iterations*ROOLING_FACTOR) )*1000; //average time in nano-seconds
     return avgRunningTime;
 }
 
@@ -50,7 +56,10 @@ double osm_function_time(unsigned int osm_iterations)
 	timeval t1, t2;
 	double runningTime = 0;
 	double avgRunningTime = -1;
-	gettimeofday(&t1, NULL);
+	int success1, success2;
+	success1 = 0;
+	success2 = 0;
+	success1 = gettimeofday(&t1, NULL);
 	for(unsigned int i = 0; i < iterations; i++)
 	{
 		emptyFunction();
@@ -64,9 +73,13 @@ double osm_function_time(unsigned int osm_iterations)
 		emptyFunction();
 		emptyFunction();
 	}
-	gettimeofday(&t2, NULL);
-	runningTime = (t2.tv_usec - t1.tv_usec);    //total time in micro-seconds
-	avgRunningTime = (runningTime/(iterations*ROOLING_FACTOR) )/1000; //average time in nano-seconds
+	success2 = gettimeofday(&t2, NULL);
+	if (success1 == -1 || success2 == -1)
+	{
+		return -1;
+	}
+	runningTime = (t2.tv_sec*(10^6) + t2.tv_usec) - (t1.tv_sec*(10^6) +  t1.tv_usec);    //total time in micro-seconds
+	avgRunningTime = (runningTime/(iterations*ROOLING_FACTOR) )*1000; //average time in nano-seconds
 	return avgRunningTime;
 }
 
@@ -78,7 +91,10 @@ double osm_syscall_time(unsigned int osm_iterations)
 	timeval t1, t2;
 	double runningTime = 0;
 	double avgRunningTime = -1;
-	gettimeofday(&t1, NULL);
+	int success1, success2;
+	success1 = 0;
+	success2 = 0;
+	success1 = gettimeofday(&t1, NULL);
 	for(unsigned int i = 0; i < iterations; i++)
 	{
 		OSM_NULLSYSCALL;
@@ -92,9 +108,13 @@ double osm_syscall_time(unsigned int osm_iterations)
 		OSM_NULLSYSCALL;
 		OSM_NULLSYSCALL;
 	}
-	gettimeofday(&t2, NULL);
-	runningTime = (t2.tv_usec - t1.tv_usec);    //total time in micro-seconds
-	avgRunningTime = (runningTime/(iterations*ROOLING_FACTOR) )/1000; //average time in nano-seconds
+	success2 = gettimeofday(&t2, NULL);
+	if (success1 == -1 || success2 == -1)
+	{
+		return -1;
+	}
+	runningTime = (t2.tv_sec*(10^6) + t2.tv_usec) - (t1.tv_sec*(10^6) +  t1.tv_usec);    //total time in micro-seconds
+	avgRunningTime = (runningTime/(iterations*ROOLING_FACTOR) )*1000; //average time in nano-seconds
 	return avgRunningTime;
 }
 

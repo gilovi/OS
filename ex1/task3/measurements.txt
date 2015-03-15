@@ -1,6 +1,6 @@
 machine name: oct-48
-instruction time (nanoSeconds): 3.6e-07
-empty function call time(nanoSeconds): 1.66e-06
-trap time (nanoSeconds): 0.00025362
-function - instruction ratio: 4.61111
-trap - instruction ratio: 704.5
+instruction time (nanoSeconds): 0.36
+empty function call time(nanoSeconds): 1.68
+trap time (nanoSeconds): 255.22
+function - instruction ratio: 4.66667
+trap - instruction ratio: 708.944

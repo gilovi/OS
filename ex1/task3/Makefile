@@ -1,11 +1,11 @@
 CC=g++
 RANLIB=ranlib
 
-LIBSRC=osm.c
-LIBOBJ=$(LIBSRC:.c=.o)
+LIBSRC=osm.cpp
+LIBOBJ=$(LIBSRC:.cpp=.o)
 
 INCS=-I.
-CFLAGS = -Wall -g $(INCS)
+CFLAGS = -Wall -g -O0 $(INCS)
 LOADLIBES = -L./
 
 OSMLIB = libosm.a
@@ -23,7 +23,7 @@ $(TARGETS):	$(LIBOBJ)
 	$(RANLIB) $@
 
 clean:
-	$(RM) $(TARGETS) $(OSMLIB) $(OBJ) $(LIBOBJ) *~ *core
+	$(RM) $(TARGETS) $(OSMLIB) $(OBJ) $(LIBOBJ) $(TARNAME) *~ *core
 
 depend:
 	makedepend -- $(CFLAGS) -- $(SRC) $(LIBSRC)

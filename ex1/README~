@@ -3,9 +3,10 @@ Moshe Mandel 301117800, Gilad Ovits 300604493
 EX: 1
 
 FILES:
-makefile 	- generates the libosm.a library.
-osm.h		- provided header, measurement of operations.
+Makefile 	- generates the libosm.a library.
+osm.h		- provided header, time measurement of operations.
 osm.cpp		- implementation of provided header.
+README		- this file.
 
 REMARKS:
 No remarks.

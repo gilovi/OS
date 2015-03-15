@@ -1,6 +1,594 @@
-machine name: oct-48
-instruction time (nanoSeconds): 0.36
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.695
+trap time (nanoSeconds): 251.298
+function - instruction ratio: 4.91304
+trap - instruction ratio: 728.4
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.696
+trap time (nanoSeconds): 251.152
+function - instruction ratio: 4.91594
+trap - instruction ratio: 727.977
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.697
+trap time (nanoSeconds): 251.134
+function - instruction ratio: 4.91884
+trap - instruction ratio: 727.925
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.681
+trap time (nanoSeconds): 251.167
+function - instruction ratio: 4.85838
+trap - instruction ratio: 725.916
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.7
+trap time (nanoSeconds): 251.214
+function - instruction ratio: 4.92754
+trap - instruction ratio: 728.157
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.692
+trap time (nanoSeconds): 251.112
+function - instruction ratio: 4.90435
+trap - instruction ratio: 727.861
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.67
+trap time (nanoSeconds): 251.057
+function - instruction ratio: 4.85465
+trap - instruction ratio: 729.817
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.675
+trap time (nanoSeconds): 251.038
+function - instruction ratio: 4.84104
+trap - instruction ratio: 725.543
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.685
+trap time (nanoSeconds): 251.08
+function - instruction ratio: 4.86994
+trap - instruction ratio: 725.665
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.681
+trap time (nanoSeconds): 250.952
+function - instruction ratio: 4.85838
+trap - instruction ratio: 725.295
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.682
+trap time (nanoSeconds): 251.067
+function - instruction ratio: 4.86127
+trap - instruction ratio: 725.627
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.682
+trap time (nanoSeconds): 251.138
+function - instruction ratio: 4.86127
+trap - instruction ratio: 725.832
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.678
+trap time (nanoSeconds): 250.919
+function - instruction ratio: 4.87791
+trap - instruction ratio: 729.416
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.697
+trap time (nanoSeconds): 251.232
+function - instruction ratio: 4.91884
+trap - instruction ratio: 728.209
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.711
+trap time (nanoSeconds): 251.141
+function - instruction ratio: 4.95942
+trap - instruction ratio: 727.945
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.699
+trap time (nanoSeconds): 251.148
+function - instruction ratio: 4.92464
+trap - instruction ratio: 727.965
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.696
+trap time (nanoSeconds): 251.031
+function - instruction ratio: 4.90173
+trap - instruction ratio: 725.523
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.689
+trap time (nanoSeconds): 251.078
+function - instruction ratio: 4.8815
+trap - instruction ratio: 725.659
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.698
+trap time (nanoSeconds): 251.106
+function - instruction ratio: 4.92174
+trap - instruction ratio: 727.843
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.681
+trap time (nanoSeconds): 251.219
+function - instruction ratio: 4.87246
+trap - instruction ratio: 728.171
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.677
+trap time (nanoSeconds): 251.067
+function - instruction ratio: 4.86087
+trap - instruction ratio: 727.73
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.685
+trap time (nanoSeconds): 250.86
+function - instruction ratio: 4.89826
+trap - instruction ratio: 729.244
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.694
+trap time (nanoSeconds): 251.097
+function - instruction ratio: 4.91014
+trap - instruction ratio: 727.817
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.698
+trap time (nanoSeconds): 251.16
+function - instruction ratio: 4.92174
+trap - instruction ratio: 728
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.683
+trap time (nanoSeconds): 251.147
+function - instruction ratio: 4.86416
+trap - instruction ratio: 725.858
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.67
+trap time (nanoSeconds): 251.24
+function - instruction ratio: 4.84058
+trap - instruction ratio: 728.232
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.696
+trap time (nanoSeconds): 251.01
+function - instruction ratio: 4.91594
+trap - instruction ratio: 727.565
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.664
+trap time (nanoSeconds): 251.062
+function - instruction ratio: 4.82319
+trap - instruction ratio: 727.716
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.698
+trap time (nanoSeconds): 250.957
+function - instruction ratio: 4.92174
+trap - instruction ratio: 727.412
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.699
+trap time (nanoSeconds): 250.927
+function - instruction ratio: 4.92464
+trap - instruction ratio: 727.325
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.695
+trap time (nanoSeconds): 251.344
+function - instruction ratio: 4.91304
+trap - instruction ratio: 728.533
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.687
+trap time (nanoSeconds): 251.289
+function - instruction ratio: 4.87572
+trap - instruction ratio: 726.269
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.673
+trap time (nanoSeconds): 251.037
+function - instruction ratio: 4.84928
+trap - instruction ratio: 727.643
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.682
+trap time (nanoSeconds): 251.095
+function - instruction ratio: 4.88953
+trap - instruction ratio: 729.927
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.676
+trap time (nanoSeconds): 251.334
+function - instruction ratio: 4.85797
+trap - instruction ratio: 728.504
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.69
+trap time (nanoSeconds): 251.262
+function - instruction ratio: 4.89855
+trap - instruction ratio: 728.296
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.689
+trap time (nanoSeconds): 251.182
+function - instruction ratio: 4.89565
+trap - instruction ratio: 728.064
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.667
+trap time (nanoSeconds): 251.011
+function - instruction ratio: 4.83188
+trap - instruction ratio: 727.568
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.658
+trap time (nanoSeconds): 251.023
+function - instruction ratio: 4.81977
+trap - instruction ratio: 729.718
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.686
+trap time (nanoSeconds): 251.105
+function - instruction ratio: 4.90116
+trap - instruction ratio: 729.956
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.668
+trap time (nanoSeconds): 251.214
+function - instruction ratio: 4.83478
+trap - instruction ratio: 728.157
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.698
+trap time (nanoSeconds): 251.242
+function - instruction ratio: 4.90751
+trap - instruction ratio: 726.133
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.686
+trap time (nanoSeconds): 251.235
+function - instruction ratio: 4.88696
+trap - instruction ratio: 728.217
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.696
+trap time (nanoSeconds): 251.308
+function - instruction ratio: 4.93023
+trap - instruction ratio: 730.547
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
 empty function call time(nanoSeconds): 1.68
-trap time (nanoSeconds): 255.22
-function - instruction ratio: 4.66667
-trap - instruction ratio: 708.944
+trap time (nanoSeconds): 251.023
+function - instruction ratio: 4.85549
+trap - instruction ratio: 725.5
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.69
+trap time (nanoSeconds): 251.132
+function - instruction ratio: 4.88439
+trap - instruction ratio: 725.815
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.714
+trap time (nanoSeconds): 251.192
+function - instruction ratio: 4.95376
+trap - instruction ratio: 725.988
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.694
+trap time (nanoSeconds): 251.371
+function - instruction ratio: 4.91014
+trap - instruction ratio: 728.612
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.686
+trap time (nanoSeconds): 251.102
+function - instruction ratio: 4.88696
+trap - instruction ratio: 727.832
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.687
+trap time (nanoSeconds): 251.433
+function - instruction ratio: 4.87572
+trap - instruction ratio: 726.685
+machine name: nan-26
+instruction time (nanoSeconds): 0.349
+empty function call time(nanoSeconds): 1.701
+trap time (nanoSeconds): 251.213
+function - instruction ratio: 4.87393
+trap - instruction ratio: 719.808
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.676
+trap time (nanoSeconds): 251.264
+function - instruction ratio: 4.87209
+trap - instruction ratio: 730.419
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.696
+trap time (nanoSeconds): 251.206
+function - instruction ratio: 4.90173
+trap - instruction ratio: 726.029
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.682
+trap time (nanoSeconds): 251.449
+function - instruction ratio: 4.88953
+trap - instruction ratio: 730.956
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.67
+trap time (nanoSeconds): 251.071
+function - instruction ratio: 4.85465
+trap - instruction ratio: 729.858
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.68
+trap time (nanoSeconds): 251.175
+function - instruction ratio: 4.88372
+trap - instruction ratio: 730.16
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.686
+trap time (nanoSeconds): 251.053
+function - instruction ratio: 4.87283
+trap - instruction ratio: 725.587
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.681
+trap time (nanoSeconds): 251.112
+function - instruction ratio: 4.87246
+trap - instruction ratio: 727.861
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.7
+trap time (nanoSeconds): 251.191
+function - instruction ratio: 4.94186
+trap - instruction ratio: 730.206
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.671
+trap time (nanoSeconds): 251.146
+function - instruction ratio: 4.84348
+trap - instruction ratio: 727.959
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.664
+trap time (nanoSeconds): 251.044
+function - instruction ratio: 4.83721
+trap - instruction ratio: 729.779
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.681
+trap time (nanoSeconds): 251.253
+function - instruction ratio: 4.88663
+trap - instruction ratio: 730.387
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.671
+trap time (nanoSeconds): 251.217
+function - instruction ratio: 4.82948
+trap - instruction ratio: 726.061
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.686
+trap time (nanoSeconds): 251.226
+function - instruction ratio: 4.90116
+trap - instruction ratio: 730.308
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.689
+trap time (nanoSeconds): 251.015
+function - instruction ratio: 4.89565
+trap - instruction ratio: 727.58
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.688
+trap time (nanoSeconds): 251.165
+function - instruction ratio: 4.89275
+trap - instruction ratio: 728.014
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.686
+trap time (nanoSeconds): 251.067
+function - instruction ratio: 4.87283
+trap - instruction ratio: 725.627
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.688
+trap time (nanoSeconds): 251.258
+function - instruction ratio: 4.87861
+trap - instruction ratio: 726.179
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.685
+trap time (nanoSeconds): 251.232
+function - instruction ratio: 4.88406
+trap - instruction ratio: 728.209
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.669
+trap time (nanoSeconds): 251.318
+function - instruction ratio: 4.83768
+trap - instruction ratio: 728.458
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.699
+trap time (nanoSeconds): 251.035
+function - instruction ratio: 4.9104
+trap - instruction ratio: 725.535
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.673
+trap time (nanoSeconds): 251.14
+function - instruction ratio: 4.83526
+trap - instruction ratio: 725.838
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.686
+trap time (nanoSeconds): 251.245
+function - instruction ratio: 4.88696
+trap - instruction ratio: 728.246
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.701
+trap time (nanoSeconds): 250.898
+function - instruction ratio: 4.94477
+trap - instruction ratio: 729.355
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.679
+trap time (nanoSeconds): 251.208
+function - instruction ratio: 4.88081
+trap - instruction ratio: 730.256
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.673
+trap time (nanoSeconds): 251.269
+function - instruction ratio: 4.84928
+trap - instruction ratio: 728.316
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.689
+trap time (nanoSeconds): 251.175
+function - instruction ratio: 4.8815
+trap - instruction ratio: 725.939
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.679
+trap time (nanoSeconds): 251.134
+function - instruction ratio: 4.86667
+trap - instruction ratio: 727.925
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.697
+trap time (nanoSeconds): 251.215
+function - instruction ratio: 4.91884
+trap - instruction ratio: 728.159
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.694
+trap time (nanoSeconds): 251.21
+function - instruction ratio: 4.91014
+trap - instruction ratio: 728.145
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.697
+trap time (nanoSeconds): 251.078
+function - instruction ratio: 4.90462
+trap - instruction ratio: 725.659
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.682
+trap time (nanoSeconds): 251.124
+function - instruction ratio: 4.86127
+trap - instruction ratio: 725.792
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.717
+trap time (nanoSeconds): 251.316
+function - instruction ratio: 4.97681
+trap - instruction ratio: 728.452
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.694
+trap time (nanoSeconds): 251.228
+function - instruction ratio: 4.92442
+trap - instruction ratio: 730.314
+machine name: nan-26
+instruction time (nanoSeconds): 0.347
+empty function call time(nanoSeconds): 1.667
+trap time (nanoSeconds): 251.141
+function - instruction ratio: 4.80403
+trap - instruction ratio: 723.749
+machine name: nan-26
+instruction time (nanoSeconds): 0.347
+empty function call time(nanoSeconds): 1.661
+trap time (nanoSeconds): 251.039
+function - instruction ratio: 4.78674
+trap - instruction ratio: 723.455
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.684
+trap time (nanoSeconds): 251.029
+function - instruction ratio: 4.86705
+trap - instruction ratio: 725.517
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.696
+trap time (nanoSeconds): 250.853
+function - instruction ratio: 4.93023
+trap - instruction ratio: 729.224
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.687
+trap time (nanoSeconds): 250.974
+function - instruction ratio: 4.87572
+trap - instruction ratio: 725.358
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.686
+trap time (nanoSeconds): 251.148
+function - instruction ratio: 4.87283
+trap - instruction ratio: 725.861
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.677
+trap time (nanoSeconds): 251.236
+function - instruction ratio: 4.86087
+trap - instruction ratio: 728.22
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.68
+trap time (nanoSeconds): 251.117
+function - instruction ratio: 4.86957
+trap - instruction ratio: 727.875
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.676
+trap time (nanoSeconds): 251.052
+function - instruction ratio: 4.87209
+trap - instruction ratio: 729.802
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.69
+trap time (nanoSeconds): 250.933
+function - instruction ratio: 4.88439
+trap - instruction ratio: 725.24
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.669
+trap time (nanoSeconds): 250.715
+function - instruction ratio: 4.85174
+trap - instruction ratio: 728.823
+machine name: nan-26
+instruction time (nanoSeconds): 0.344
+empty function call time(nanoSeconds): 1.675
+trap time (nanoSeconds): 251.268
+function - instruction ratio: 4.86919
+trap - instruction ratio: 730.43
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.689
+trap time (nanoSeconds): 250.983
+function - instruction ratio: 4.8815
+trap - instruction ratio: 725.384
+machine name: nan-26
+instruction time (nanoSeconds): 0.346
+empty function call time(nanoSeconds): 1.688
+trap time (nanoSeconds): 251.107
+function - instruction ratio: 4.87861
+trap - instruction ratio: 725.743
+machine name: nan-26
+instruction time (nanoSeconds): 0.345
+empty function call time(nanoSeconds): 1.686
+trap time (nanoSeconds): 251.203
+function - instruction ratio: 4.88696
+trap - instruction ratio: 728.125

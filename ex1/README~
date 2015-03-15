@@ -1,19 +1,24 @@
-login1, gilovi
-Student Name1 (ID1), 300604493
+moshemandel, gilovi
+Moshe Mandel 301117800, Gilad Ovits 300604493
 EX: 1
 
 FILES:
-
+makefile 	- generates the libosm.a library.
+osm.h		- provided header, measurement of operations.
+osm.cpp		- implementation of provided header.
 
 REMARKS:
-
+No remarks.
 
 ANSWERS:
 
 Task 1:
 =========================================
+This process creates 2 new directories: one nested in another, creates a file in the nested directory, opens the file and writes data in the new file. It then closes the file and deletes it (the space is made available for reuse).
+Finally, the 2 new directories are removed by the opposite order of creation.
 
-the output for strace WhatIDo is:
+
+The output for strace WhatIDo is:
 
 mkdir("os", 0775)                       = 0
 -created a new directory named 'os', with user and group premissions to read,write and execute. and to other to read and execute. 
@@ -37,20 +42,39 @@ open("os/2015/info", O_WRONLY|O_CREAT|O_TRUNC, 0666) = 3
 	0666 - the file gets the read and write permissions for oner group and other.
 
 fstat(3, {st_mode=S_IFREG|0644, st_size=0, ...}) = 0
--
+-saves the file's information to a buffer.
 
 mmap(NULL, 65536, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f68758b3000
+-creates a new mapping in the virtual address space
+
 write(3, "                                "..., 119) = 119
+-writes 119 spaces to "os/2015/info".  
 close(3)                                = 0
+-closes "os/2015/info".
 munmap(0x7f68758b3000, 65536)           = 0
+-unmap 0x7f68758b3000 from memory.
 unlink("os/2015/info")                  = 0
+-deletes the link of "os/2015/info" from filesystem, and since this is the last link - the file is deleted.
 rmdir("os/2015/")                       = 0
+-removes (deletes) directory "os/2015/"
 rmdir("os/")                            = 0
+-removes directory "os/"
 exit_group(0)                           = ?
+-exits all threads of the process. 
 
 
 
 
 Task 2:
 =========================================
+1. Interrupt handling can result in unwanted behaviour of the program, two possible side-effects are:
+  a. When 2 programs try to write to the same file simultanously (e.g. program #1 started writing to the file, an interupt occurs, and program #2 starts writing to file), the end result may not be what the programmer intended. For example, the written file can contain a mixed gibrish of the output from both programs instead of the output from the second program following the output from the first program.
+  b. Interrups add to the total running time of the program (from the moment it is called, until the moment it returns a value), therefore time-based programs (such as a program that records its own running time) may not behave as expected because its "perception" of time will be distorded - due to the time it takes for the OS to return to this program.
 
+2. This does not seem to be a good idea, as it undermines the whole concept of allowing the OS to perform multiple tasks "simultaniously" and efficiently. The implications are that, using this "solution", the running time of the processor running multiple tasks may drastically increase. Furthermore, during the time such a program blocks all interrups, no multi-tasking can be perfomed by the processor, and all programs necessary for operating the computer are halted (the computer is temporarly unusable).
+
+Task 3:
+=========================================
+Our functions use unrooling - this results in better measurement because operations which we do not intent measuring, such as loop control, are executed less times (compared to measuring without unrooling).
+Averaging a measurment over a large number of iterations results in better accuracy, because any side-effect that may randomly occur to some events have little impact on the final measurement.
+Additionaly to what was specified in the exercise description, we can tell our measurements are good enough if they converge with respect to the number of iterations.

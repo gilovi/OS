@@ -1,4 +1,4 @@
-CC=gcc
+CC=g++
 RANLIB=ranlib
 
 LIBSRC=osm.c

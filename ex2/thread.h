@@ -17,10 +17,12 @@
 class Thread
 {
 public:
-	Thread();
+
+	Thread(int id = 0);
+
 	~Thread();
 
-	int getID() const {return _id;}
+	int getID() const;
 
 	char* getStack() const {return _stack;}
 

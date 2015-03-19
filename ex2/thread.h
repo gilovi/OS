@@ -18,7 +18,7 @@ class Thread
 {
 public:
 
-	Thread(int id = 0);
+	Thread(int id = -1);
 
 	~Thread();
 

@@ -32,7 +32,7 @@ sigjmp_buf* Thread::getThreadState() const
 	return _threadState;
 }
 
-int Thread::getQuntums() const
+int Thread::getQuantums() const
 {
 	return _quantums;
 }

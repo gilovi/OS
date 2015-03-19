@@ -28,7 +28,7 @@ public:
 
 	sigjmp_buf* getThreadState() const;
 
-	int getQuntums() const;
+	int getQuantums() const;
 
 	void increaseQuantum();
 

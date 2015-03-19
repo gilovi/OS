@@ -24,15 +24,15 @@ public:
 
 	int getID() const;
 
-	char* getStack() const {return _stack;}
+	char* getStack() const;
 
-	sigjmp_buf* getThreadState() const {return _threadState;}
+	sigjmp_buf* getThreadState() const;
 
-	int getQuntums() const {return _quantums;}
+	int getQuntums() const;
 
-	void increaseQuantum() {_quantums++;}
+	void increaseQuantum();
 
-	Priority getPriority() const {return _priority;}
+	Priority getPriority() const;
 
 private:
 	int _id;

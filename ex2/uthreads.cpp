@@ -15,3 +15,42 @@ Thread* gBlocked[MAX_THREAD_NUM];
 std::queue<Thread*> gRed;
 std::queue<Thread*> gOrange;
 std::queue<Thread*> gGreen;
+
+const
+int uthread_init(int quantum_usecs)
+{
+
+}
+
+
+#ifdef __x86_64__
+/* code for 64 bit Intel arch */
+
+/* A translation is required when using an address of a variable.
+   Use this as a black box in your code. */
+address_t translate_address(address_t addr)
+{
+    address_t ret;
+    asm volatile("xor    %%fs:0x30,%0\n"
+		"rol    $0x11,%0\n"
+                 : "=g" (ret)
+                 : "0" (addr));
+    return ret;
+}
+
+#else
+/* code for 32 bit Intel arch */
+
+/* A translation is required when using an address of a variable.
+   Use this as a black box in your code. */
+address_t translate_address(address_t addr)
+{
+    address_t ret;
+    asm volatile("xor    %%gs:0x18,%0\n"
+		"rol    $0x9,%0\n"
+                 : "=g" (ret)
+                 : "0" (addr));
+    return ret;
+}
+
+#endif

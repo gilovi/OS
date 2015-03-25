@@ -9,6 +9,7 @@
 #define THREAD_H_
 
 #include <setjmp.h>
+#include "uthreads.h"
 
 //TODO: this is redefined from uthreads.h, should be fixed
 #define MAX_THREAD_NUM 100 /* maximal number of threads */
@@ -19,6 +20,8 @@ class Thread
 public:
 
 	Thread(int id = -1);
+
+	Thread(int id ,void (*location)(void), Priority priority);
 
 	~Thread();
 
@@ -34,10 +37,11 @@ public:
 
 	Priority getPriority() const;
 
+
 private:
 	int _id;
 	char _stack[STACK_SIZE];
-	sigjmp_buf *_threadState;
+	sigjmp_buf _threadState;
 	int _quantums;
 	Priority _priority;
 };

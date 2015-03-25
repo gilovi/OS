@@ -9,6 +9,20 @@
 #define MAX_THREAD_NUM 100 /* maximal number of threads */
 #define STACK_SIZE 4096 /* stack size per thread (in bytes) */
 
+
+#ifdef __x86_64__
+/* code for 64 bit Intel arch */
+typedef unsigned long address_t;
+#define JB_SP 6
+#define JB_PC 7
+
+#else
+/* code for 32 bit Intel arch */
+typedef unsigned int address_t;
+#define JB_SP 4
+#define JB_PC 5
+#endif
+
 /* External interface */
 typedef enum Priority { RED, ORANGE, GREEN } Priority;
 
@@ -36,5 +50,10 @@ int uthread_get_total_quantums();
 
 /* Get the number of thread quantums */
 int uthread_get_quantums(int tid);
+
+/*Get the lowest unccupied ID */
+int getLowestAvailId();
+
+address_t translate_address(address_t addr);
 
 #endif

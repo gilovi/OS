@@ -1,0 +1,5 @@
+# depslib dependency file v1.0
+1427305970 source:/a/fr-05/vol/secondary/stud/gilovi/OS/ex2/main.cpp
+	<iostream>
+	<typeinfo>
+

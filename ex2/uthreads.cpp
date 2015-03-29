@@ -15,9 +15,7 @@ int gQuantum_usecs;
 Thread* gThreads[MAX_THREAD_NUM];
 Thread* gRunning;
 Thread* gBlocked[MAX_THREAD_NUM];
-std::queue<Thread*> gRed;
-std::queue<Thread*> gOrange;
-std::queue<Thread*> gGreen;
+PriorityList gReady;
 
 int uthread_init(int quantum_usecs)
 {

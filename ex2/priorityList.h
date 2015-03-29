@@ -10,18 +10,22 @@
 
 #include "thread.h"
 
-class Ready{
+class PriorityList{
 
-	Ready();
+	PriorityList();
 
-	~Ready();
+	~PriorityList();
 
 	bool empty() const;
 
 	Thread* pop();
 
-	void push();
+	void push(Thread* val);
 
+private:
+	std::queue<Thread*> _red;
+	std::queue<Thread*> _orange;
+	std::queue<Thread*> _green;
 };
 
 

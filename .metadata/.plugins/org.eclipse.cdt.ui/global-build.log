@@ -1,0 +1,7 @@
+11:22:54 **** Build of configuration Default for project task3 ****
+make all 
+g++    -c -o osm.o osm.cpp
+ar rv libosm.a osm.o
+ar: creating libosm.a
+a - osm.o
+ranlib libosm.a

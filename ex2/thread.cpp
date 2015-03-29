@@ -11,8 +11,8 @@
 #include "thread.h"
 
 
-Thread::Thread(int id)
-: _id(id), _quantums(0), _priority(GREEN)
+Thread::Thread(int id, Priority priority)
+: _id(id), _quantums(0), _priority(priority)
 {
 
 }

@@ -19,7 +19,7 @@ class Thread
 {
 public:
 
-	Thread(int id = -1);
+	Thread(int id, Priority priority);
 
 	Thread(int id ,void (*location)(void), Priority priority);
 

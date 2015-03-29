@@ -9,6 +9,7 @@
 #include <queue>
 
 int gTotalQuantums;
+int gQuantum_usecs;
 Thread gThreads[MAX_THREAD_NUM];
 Thread* gRunning;
 Thread* gBlocked[MAX_THREAD_NUM];
@@ -16,10 +17,13 @@ std::queue<Thread*> gRed;
 std::queue<Thread*> gOrange;
 std::queue<Thread*> gGreen;
 
-const
 int uthread_init(int quantum_usecs)
 {
+	gQuantum_usecs = quantum_usecs;
+	Thread mainThread = new Thread(0, ORANGE);
 
+//	TODO: what is considered a failure? -- when do we return (-1)?
+	return SUCCESS;
 }
 
 

@@ -12,6 +12,8 @@ std::queue<Thread*> gRed;
 std::queue<Thread*> gOrange;
 std::queue<Thread*> gGreen;
 
+int gQuantum_usecs;
+
    static void myMethod() ;
 
 }

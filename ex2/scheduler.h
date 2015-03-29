@@ -5,16 +5,12 @@
 
 namespace scheduler
 {
-Thread gThreads[MAX_THREAD_NUM];
 Thread* gRunning;
 Thread* gBlocked[MAX_THREAD_NUM];
-std::queue<Thread*> gRed;
-std::queue<Thread*> gOrange;
-std::queue<Thread*> gGreen;
+priorityList ready;
 
-int gQuantum_usecs;
-
-   static void myMethod() ;
+   static void init(*Thread);
+   static void add(*Thread);
 
 }
 

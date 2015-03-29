@@ -1,5 +1,17 @@
 # depslib dependency file v1.0
-1427305970 source:/a/fr-05/vol/secondary/stud/gilovi/OS/ex2/main.cpp
+1427621864 source:/a/fr-05/vol/secondary/stud/gilovi/OS/ex2/main.cpp
 	<iostream>
 	<typeinfo>
+
+1427625889 source:/a/fr-05/vol/secondary/stud/gilovi/OS/ex2/thread.cpp
+	<setjmp.h>
+	<signal.h>
+	<unistd.h>
+	"thread.h"
+
+1427625897 /a/fr-05/vol/secondary/stud/gilovi/OS/ex2/thread.h
+	<setjmp.h>
+	"uthreads.h"
+
+1427622789 /a/fr-05/vol/secondary/stud/gilovi/OS/ex2/uthreads.h
 

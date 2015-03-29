@@ -29,7 +29,7 @@ public:
 
 	char* getStack() const;
 
-	sigjmp_buf* getThreadState() const;
+	sigjmp_buf* getThreadState() ;
 
 	int getQuantums() const;
 
@@ -40,7 +40,7 @@ public:
 
 private:
 	int _id;
-	char _stack[STACK_SIZE];
+	char *_stack;
 	sigjmp_buf _threadState;
 	int _quantums;
 	Priority _priority;

@@ -7,10 +7,12 @@
 
 #include "uthreads.h"
 #include <queue>
+#include "thread.h"
+#include "scheduler.h"
 
 int gTotalQuantums;
 int gQuantum_usecs;
-Thread gThreads[MAX_THREAD_NUM];
+Thread* gThreads[MAX_THREAD_NUM];
 Thread* gRunning;
 Thread* gBlocked[MAX_THREAD_NUM];
 std::queue<Thread*> gRed;
@@ -20,7 +22,12 @@ std::queue<Thread*> gGreen;
 int uthread_init(int quantum_usecs)
 {
 	gQuantum_usecs = quantum_usecs;
-	Thread mainThread = new Thread(0, ORANGE);
+	Thread *mainThread = new Thread(0, ORANGE);
+
+    if (!sigsetjmp(*(mainThread->getThreadState() ),1))
+    {
+        scheduler::init(&mainThread)
+    }
 
 //	TODO: what is considered a failure? -- when do we return (-1)?
 	return SUCCESS;

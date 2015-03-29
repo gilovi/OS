@@ -19,7 +19,7 @@ PriorityList::~PriorityList()
 
 bool PriorityList::empty() const
 {
-	return (_red.empty() && _green.empty() && _green.empty() );
+	return (_red.empty() && _orange.empty() && _green.empty() );
 }
 
 //assumes list is non-empty (if empty: returns nullptr)
@@ -48,7 +48,7 @@ Thread* PriorityList::pop()
 
 void PriorityList::push(Thread* val)
 {
-	switch (val->_priority)
+	switch (val->getPriority() )
 	{
 	case RED :
 		_red.push(val);

@@ -12,7 +12,7 @@
 
 
 Thread::Thread(int id, Priority priority)
-: _id(id), _quantums(0), _priority(priority)
+: _id(id), _quantums(1), _priority(priority)
 {
     _stack = new char[STACK_SIZE];
 }

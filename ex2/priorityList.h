@@ -7,10 +7,12 @@
 
 #ifndef READY_H_
 #define READY_H_
-
+#include <queue>
 #include "thread.h"
 
-class PriorityList{
+class PriorityList
+{
+public:
 
 	PriorityList();
 

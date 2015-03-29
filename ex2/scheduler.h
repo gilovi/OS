@@ -3,16 +3,15 @@
 
 
 
-namespace scheduler
-{
-Thread* gRunning;
-Thread* gBlocked[MAX_THREAD_NUM];
-priorityList ready;
-
-   static void init(*Thread);
-   static void add(*Thread);
-
-}
+//namespace scheduler
+//{
+//Thread* gRunning;
+//Thread* gBlocked[MAX_THREAD_NUM];
+//
+//   static void init(*Thread);
+//   static void add(*Thread);
+//
+//}
 
 
 #endif // SCHEDULER_H_INCLUDED

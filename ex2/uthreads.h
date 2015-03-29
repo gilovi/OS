@@ -25,6 +25,7 @@ typedef unsigned int address_t;
 #define JB_PC 5
 #endif
 
+
 /* External interface */
 typedef enum Priority { RED, ORANGE, GREEN } Priority;
 
@@ -53,8 +54,9 @@ int uthread_get_total_quantums();
 /* Get the number of thread quantums */
 int uthread_get_quantums(int tid);
 
-/*Get the lowest unccupied ID */
-int getLowestAvailId();
+void timer_handler(int sig);
+
+void initTimer();
 
 address_t translate_address(address_t addr);
 

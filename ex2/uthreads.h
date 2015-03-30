@@ -9,22 +9,9 @@
 #define MAX_THREAD_NUM 100 /* maximal number of threads */
 #define STACK_SIZE 4096 /* stack size per thread (in bytes) */
 #define SUCCESS 0
-#define FALIURE -1
+#define FAILURE -1
 
-
-#ifdef __x86_64__
-/* code for 64 bit Intel arch */
-typedef unsigned long address_t;
-#define JB_SP 6
-#define JB_PC 7
-
-#else
-/* code for 32 bit Intel arch */
-typedef unsigned int address_t;
-#define JB_SP 4
-#define JB_PC 5
-#endif
-
+typedef enum State { READY, RUNNING, BLOCKED } State;
 
 /* External interface */
 typedef enum Priority { RED, ORANGE, GREEN } Priority;
@@ -53,11 +40,5 @@ int uthread_get_total_quantums();
 
 /* Get the number of thread quantums */
 int uthread_get_quantums(int tid);
-
-void timer_handler(int sig);
-
-void initTimer();
-
-address_t translate_address(address_t addr);
 
 #endif

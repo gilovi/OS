@@ -11,14 +11,15 @@
 #include "thread.h"
 
 
+
 Thread::Thread(int id, Priority priority)
-: _id(id), _quantums(1), _priority(priority)
+: _id(id), _quantums(1), _priority(priority), _currState(READY)
 {
     _stack = new char[STACK_SIZE];
 }
 
 Thread::Thread(int id ,void (*location)(void), Priority priority)
-: _id(id), _quantums(0), _priority(priority)
+: _id(id), _quantums(0), _priority(priority), _currState(READY)
 {
     _stack = new char[STACK_SIZE];
 
@@ -67,5 +68,15 @@ void Thread::increaseQuantum()
 Priority Thread::getPriority() const
 {
 	return _priority;
+}
+
+void Thread::setState(State state)
+{
+	_currState = state;
+}
+
+State Thread::getState() const
+{
+	return _currState;
 }
 

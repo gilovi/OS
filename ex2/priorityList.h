@@ -7,8 +7,14 @@
 
 #ifndef READY_H_
 #define READY_H_
-#include <queue>
+#include <list>
+#include <map>
 #include "thread.h"
+
+struct threadData {
+	Priority priority;
+	std::list<Thread*>::iterator threadIt;
+};
 
 class PriorityList
 {
@@ -22,12 +28,20 @@ public:
 
 	Thread* pop();
 
-	void push(Thread* val);
+	void push(Thread* thread);
+
+	void remove(int tid);
+
+	int size() const;
+
+	bool contains(int tid);
 
 private:
-	std::queue<Thread*> _red;
-	std::queue<Thread*> _orange;
-	std::queue<Thread*> _green;
+
+	std::list<Thread*> _red;
+	std::list<Thread*> _orange;
+	std::list<Thread*> _green;
+	std::map<int, threadData> _idMap;
 };
 
 

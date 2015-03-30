@@ -11,9 +11,21 @@
 #include <setjmp.h>
 #include "uthreads.h"
 
-//TODO: this is redefined from uthreads.h, should be fixed
-#define MAX_THREAD_NUM 100 /* maximal number of threads */
-#define STACK_SIZE 4096 /* stack size per thread (in bytes) */
+
+#ifdef __x86_64__
+/* code for 64 bit Intel arch */
+	typedef unsigned long address_t;
+	#define JB_SP 6
+	#define JB_PC 7
+
+#else
+/* code for 32 bit Intel arch */
+	typedef unsigned int address_t;
+	#define JB_SP 4
+	#define JB_PC 5
+#endif
+
+address_t translate_address(address_t addr);
 
 class Thread
 {
@@ -37,6 +49,10 @@ public:
 
 	Priority getPriority() const;
 
+	void setState(State state);
+
+	State getState() const;
+
 
 private:
 	int _id;
@@ -44,6 +60,7 @@ private:
 	sigjmp_buf _threadState;
 	int _quantums;
 	Priority _priority;
+	State _currState;
 };
 
 

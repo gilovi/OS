@@ -11,7 +11,7 @@
 #define SUCCESS 0
 #define FAILURE -1
 
-typedef enum State { READY, RUNNING, BLOCKED } State;
+typedef enum State { READY, RUNNING, BLOCKED, TERMINATED} State;
 
 /* External interface */
 typedef enum Priority { RED, ORANGE, GREEN } Priority;

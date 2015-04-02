@@ -14,7 +14,6 @@
 #include<stddef.h>
 #include <map>
 #include "thread.h"
-#include "scheduler.h"
 #include "priorityList.h"
 
 //TODO: remove
@@ -34,71 +33,86 @@ std::map<int, Thread*> gBlocked;
 PriorityList gReady;
 std::priority_queue<int, std::vector<int>, std::greater<int> > availableID;
 
+struct itimerval gTimer;
 
-void scheduler(int sig)
+void switchThreads(State state)
 {
-//TODO: remove
-//	if (timercmp(&t1,&t2,<) )
-//	{
-//		gettimeofday(&t1, NULL);
-//		timersub(&t1,&t2,&res);
-//	}
-//	else
-//	{
-//		gettimeofday(&t2,NULL);
-//		timersub(&t2,&t1,&res);
-//	}
-//	runningTime= res.tv_sec*(10^6) + res.tv_usec;
-//	std::cout<<"interval time: " << runningTime <<std::endl;
-//    std::cout<<gRunning->getID() << "--> " << sig <<std::endl;
-//    std::cin.get();
+//	block timer
+	sigset_t signalSet;
+	sigemptyset(&signalSet);
+	sigaddset(&signalSet,SIGVTALRM);
+	sigprocmask(SIG_BLOCK,&signalSet,NULL);
+
 
 	gTotalQuantums++;
-    if (!gReady.empty())
-    {
-        Thread *next = gReady.pop();
-        gReady.push(gRunning);
-        gRunning->setState(READY);
-        if (!sigsetjmp(*(gRunning->getThreadState() ),1))
-        {
-            gRunning = next;
-            next->setState(RUNNING);
-            gRunning->increaseQuantum();
-            siglongjmp(*(gRunning->getThreadState() ),1);
-        }
-    }
-    else
-    {
-        gRunning->increaseQuantum();
-    }
+	switch(state)
+	{
+	case READY :
+		if (!gReady.empty())
+		{
+			Thread *next = gReady.pop();
+			gReady.push(gRunning);
+			gRunning->setState(READY);
+			if (!sigsetjmp(*(gRunning->getThreadState() ),1))
+			{
+				gRunning = next;
+				next->setState(RUNNING);
+				gRunning->increaseQuantum();
+				siglongjmp(*(gRunning->getThreadState() ),1);
+			}
+		}
+		else
+		{
+			gRunning->increaseQuantum();
+		}
+		break;
+	case BLOCKED :
+			gRunning->setState(BLOCKED);
+			gBlocked[gRunning->getID()] = gRunning;
+			gRunning = gReady.pop();
+			gRunning->setState(RUNNING);
+			siglongjmp(*(gRunning->getThreadState() ),1);
+		break;
+	case RUNNING:
+		break;
+	case TERMINATED :
+			gThreads.erase(gRunning->getID() );
+			delete gRunning;
+			gRunning = gReady.pop();
+			gRunning->setState(RUNNING);
+			siglongjmp(*(gRunning->getThreadState() ),1);
+		break;
+	default :
+		break;
+	}
 
+
+//    resume timer
+	sigprocmask(SIG_UNBLOCK,&signalSet,NULL);
+	setitimer(ITIMER_VIRTUAL, &gTimer, NULL);
+}
+
+void timerHandler(int sig)
+{
+	switchThreads(READY);
 }
 
 void initTimer()
 {
-    signal(SIGVTALRM, scheduler);
+    signal(SIGVTALRM, timerHandler);
 
-//    TODO: remove
-//    t1 = {0}, t2 = {0}, res = {0};
-//    gettimeofday(&t1,NULL);
-
-    struct itimerval tv;
     int seconds = floor(gQuantum_usecs/(10^6) );
     int microseconds = gQuantum_usecs - seconds*(10^6);
 
-//    TODO: remove
-//    std::cout<<"seconds: " << seconds << "\nmicorseconds: " << microseconds << std::endl;
-//    std::cin.get();
+    gTimer.it_value.tv_sec = seconds;  /* first time interval, seconds part */
+    gTimer.it_value.tv_usec = microseconds; /* first time interval, microseconds part */
+    gTimer.it_interval.tv_sec = seconds;  /* following time intervals, seconds part */
+    gTimer.it_interval.tv_usec = microseconds; /* following time intervals, microseconds part */
 
-    tv.it_value.tv_sec = seconds;  /* first time interval, seconds part */
-    tv.it_value.tv_usec = microseconds; /* first time interval, microseconds part */
-    tv.it_interval.tv_sec = seconds;  /* following time intervals, seconds part */
-    tv.it_interval.tv_usec = microseconds; /* following time intervals, microseconds part */
+//    setitimer(ITIMER_VIRTUAL, &gTimer, NULL);
 
-    setitimer(ITIMER_VIRTUAL, &tv, NULL);
-
-    gRunning = gReady.pop();
-    siglongjmp(*(gRunning->getThreadState() ),1);
+//    gRunning = gReady.pop();
+//    siglongjmp(*(gRunning->getThreadState() ),1);
 
 }
 
@@ -109,15 +123,19 @@ int uthread_init(int quantum_usecs)
         availableID.push(i);
     }
 	gQuantum_usecs = quantum_usecs;
-	gTotalQuantums = 1;
+	gTotalQuantums = 0;
 	Thread *mainThread = new Thread(0, ORANGE);
 	gThreads[0] = mainThread;
-	mainThread->increaseQuantum();
-    if (!sigsetjmp(*(mainThread->getThreadState() ),1))
-    {
-        gReady.push(mainThread);
-        initTimer();
-    }
+
+	initTimer();
+	gRunning = mainThread;
+	switchThreads(READY);
+//	mainThread->increaseQuantum();
+//    if (!sigsetjmp(*(mainThread->getThreadState() ),1))
+//    {
+//        gReady.push(mainThread);
+//        initTimer();
+//    }
 
 
 //	TODO: what is considered a failure? -- when do we return (-1)?
@@ -172,12 +190,13 @@ int uthread_terminate(int tid)
 	}
 	if(gThreads[tid]->getState() == RUNNING)//if true: deletes thread +  jumps to next thread
 	{
-		gRunning = gReady.pop();
-		gRunning->setState(RUNNING);
-		Thread* tmp = gThreads[tid];
-		gThreads.erase(tid);
-		delete tmp;
-		siglongjmp(*(gRunning->getThreadState() ),1);
+//		gRunning = gReady.pop();
+//		gRunning->setState(RUNNING);
+//		Thread* tmp = gThreads[tid];
+//		gThreads.erase(tid);
+//		delete tmp;
+		switchThreads(TERMINATED);
+//		siglongjmp(*(gRunning->getThreadState() ),1);
 	}
 //	if in ready or blocked: remove from lists (gReady/gBlocked + gThreads), and delete thread
 	Thread* tmp = gThreads[tid];
@@ -209,11 +228,13 @@ int uthread_suspend(int tid)
 	if(tmp->getState() == RUNNING )
 	{
 //		make scheduling decision (move to next thread)
-		gBlocked[tid] = gRunning;
-		tmp->setState(BLOCKED);
-		gRunning = gReady.pop();
-		gRunning->setState(RUNNING);
-		siglongjmp(*(gRunning->getThreadState() ),1);
+		switchThreads(BLOCKED);
+//		gBlocked[tid] = gRunning;
+//		tmp->setState(BLOCKED);
+//		gRunning = gReady.pop();
+//		gRunning->setState(RUNNING);
+//		setitimer(ITIMER_VIRTUAL, &gTimer, NULL);
+//		siglongjmp(*(gRunning->getThreadState() ),1);
 	}
 	if(tmp->getState() == READY )
 	{

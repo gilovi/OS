@@ -18,25 +18,21 @@
 
 using namespace std;
 
-
+int totalQuantums = 0;
 
 void foo()
 {
-	timeval t1, t2, res;
-	t1 = {0}, t2 = {0}, res = {0};
-	int runningTime = 0;
-	gettimeofday(&t1, NULL);
 	while(true)
 	{
-		gettimeofday(&t2, NULL);
-		timersub(&t1,&t2,&res);
-		runningTime= res.tv_sec*SECOND + res.tv_usec;
-		if(runningTime > SECOND)
+//		usleep(SECOND);
+		if (uthread_get_total_quantums() > totalQuantums)
 		{
-			cout<<"foo resuming goo"<<endl;
-			gettimeofday(&t1, NULL);
-			uthread_resume(2);
+			cout<<"foo: "<< uthread_get_quantums(1)<<endl;
+			totalQuantums = uthread_get_total_quantums();
 		}
+//		cout<<"foo resuming goo"<<endl;
+//		uthread_resume(2);
+
 	}
 }
 
@@ -44,7 +40,7 @@ void goo()
 {
 	while(true)
 	{
-		usleep(SECOND*0.5);
+//		usleep(SECOND*0.5);
 		cout<<"goo"<<endl;
 	}
 
@@ -103,33 +99,24 @@ int main()
 //	cout<<count<<endl;
 //	count = myMap.erase('a');
 //	cout<<count<<endl;
-	timeval t1, t2, res;
-	t1 = {0}, t2 = {0}, res = {0};
-	int runningTime = 0;
+
 	std::cout<<"test"<<std::endl;
-	uthread_init(1.5*(10^6));
+	uthread_init(20);
 	uthread_spawn(foo, RED);
-	uthread_spawn(goo,RED);
-	gettimeofday(&t1, NULL);
+//	uthread_spawn(goo,RED);
 	while(true)
 	{
-		gettimeofday(&t2, NULL);
-		timersub(&t1,&t2,&res);
-		runningTime= res.tv_sec*SECOND + res.tv_usec;
-		if(runningTime > SECOND)
+//		usleep(SECOND);
+		if (uthread_get_total_quantums() > totalQuantums)
 		{
-			cout<<"main suspending goo"<<endl;
-			gettimeofday(&t1, NULL);
-			uthread_suspend(2);
+			cout<<"main: "<<uthread_get_quantums(0) <<endl;
+			totalQuantums = uthread_get_total_quantums();
 		}
+
+//		cout<<"main suspending goo"<<endl;
+//		uthread_suspend(2);
 	}
-//	for(int i = 0; i < 100; i++)
-//	{
-//		this_thread::sleep_for(chrono::milliseconds(2*(10^3)));
-//		timersub(&t2,&t1,&res);
-//		runningTime= res.tv_sec*(10^6) + res.tv_usec;
-//		std::cout<<"interval time: " << runningTime <<std::endl;
-//	}
+
 	return 0;
 }
 

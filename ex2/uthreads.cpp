@@ -5,6 +5,7 @@
  *      Author: moshemandel
  */
 #include "uthreads.h"
+#include "general.h"
 
 #include <queue>
 #include <signal.h>
@@ -15,11 +16,6 @@
 #include <map>
 #include "thread.h"
 #include "priorityList.h"
-
-//TODO: remove
-#include <iostream>
-//timeval t1, t2, res;
-//int runningTime = 0;
 
 int gTotalQuantums;
 int gQuantum_usecs;
@@ -35,61 +31,106 @@ std::priority_queue<int, std::vector<int>, std::greater<int> > availableID;
 
 struct itimerval gTimer;
 
+//state determines to which list/state gRunning will be pushed to.
 void switchThreads(State state)
 {
 //	block timer
 	sigset_t signalSet;
-	sigemptyset(&signalSet);
-	sigaddset(&signalSet,SIGVTALRM);
-	sigprocmask(SIG_BLOCK,&signalSet,NULL);
+	if (sigemptyset(&signalSet) == FAILURE)
+	{
+		std::cerr << SIGEMPTY_ERR << strerror(EINVAL) << std::endl;
+		exit(1);
+	}
+	if (sigaddset(&signalSet,SIGVTALRM) == FAILURE)
+	{
+		std::cerr << SIGADD_ERR << strerror(EINVAL) << std::endl;
+		exit(1);
+	}
+	if(sigprocmask(SIG_BLOCK,&signalSet,NULL) == FAILURE)
+	{
+		int errTmp = errno;
+		std::cerr<< SIGPROCMASK_ERR << strerror(errTmp) << " -- tried to block" <<std::endl;
+		exit(1);
+	}
 
 
 	gTotalQuantums++;
-	switch(state)
+	if(gReady.empty() )
+//		either main thread is the only thread and it is running.
+//		or other thread is running and main must be in ready list.
 	{
-	case READY :
-		if (!gReady.empty())
+		gRunning->increaseQuantum();
+	}
+	else
+	{
+		Thread* next = gReady.pop();
+		int retVal = 0;
+		switch(state)
 		{
-			Thread *next = gReady.pop();
+		case READY :
 			gReady.push(gRunning);
 			gRunning->setState(READY);
-			if (!sigsetjmp(*(gRunning->getThreadState() ),1))
-			{
-				gRunning = next;
-				next->setState(RUNNING);
-				gRunning->increaseQuantum();
-				siglongjmp(*(gRunning->getThreadState() ),1);
-			}
+			retVal = sigsetjmp(*(gRunning->getThreadState() ),1);
+	//		if (!gReady.empty() )
+	//		{
+	//			Thread *next = gReady.pop();
+	//			gReady.push(gRunning);
+	//			gRunning->setState(READY);
+	//			if (!sigsetjmp(*(gRunning->getThreadState() ),1) )
+	//			{
+	//				gRunning = next;
+	//				next->setState(RUNNING);
+	//				gRunning->increaseQuantum();
+	//				siglongjmp(*(gRunning->getThreadState() ),1);
+	//			}
+	//		}
+	//		else
+	//		{
+	//			gRunning->increaseQuantum();
+	//		}
+			break;
+		case BLOCKED :
+				gRunning->setState(BLOCKED);
+				gBlocked[gRunning->getID()] = gRunning;
+				retVal = sigsetjmp(*(gRunning->getThreadState() ),1);
+	//			gRunning = gReady.pop();
+	//			gRunning->setState(RUNNING);
+	//			siglongjmp(*(gRunning->getThreadState() ),1);
+			break;
+		case TERMINATED :
+				gThreads.erase(gRunning->getID() );
+				delete gRunning;
+				retVal = 0;
+	//			gRunning = gReady.pop();
+	//			gRunning->setState(RUNNING);
+	//			siglongjmp(*(gRunning->getThreadState() ),1);
+			break;
+		default :
+			break;
 		}
-		else
+		if (retVal == 0)
 		{
+			gRunning = next;
+			next->setState(RUNNING);
 			gRunning->increaseQuantum();
+			siglongjmp(*(gRunning->getThreadState() ),1);
 		}
-		break;
-	case BLOCKED :
-			gRunning->setState(BLOCKED);
-			gBlocked[gRunning->getID()] = gRunning;
-			gRunning = gReady.pop();
-			gRunning->setState(RUNNING);
-			siglongjmp(*(gRunning->getThreadState() ),1);
-		break;
-	case RUNNING:
-		break;
-	case TERMINATED :
-			gThreads.erase(gRunning->getID() );
-			delete gRunning;
-			gRunning = gReady.pop();
-			gRunning->setState(RUNNING);
-			siglongjmp(*(gRunning->getThreadState() ),1);
-		break;
-	default :
-		break;
 	}
 
 
 //    resume timer
-	sigprocmask(SIG_UNBLOCK,&signalSet,NULL);
-	setitimer(ITIMER_VIRTUAL, &gTimer, NULL);
+	if (sigprocmask(SIG_UNBLOCK,&signalSet,NULL) == FAILURE)
+	{
+		int errTmp = errno;
+		std::cerr<< SIGPROCMASK_ERR << strerror(errTmp) << " -- tried to unblock" << std::endl;
+		exit(1);
+	}
+	if (setitimer(ITIMER_VIRTUAL, &gTimer, NULL) == FAILURE)
+	{
+		int errTmp = errno;
+		std::cerr<< SETITIMER_ERR << strerror(errTmp) << std::endl;
+		exit(1);
+	}
 }
 
 void timerHandler(int sig)
@@ -99,7 +140,12 @@ void timerHandler(int sig)
 
 void initTimer()
 {
-    signal(SIGVTALRM, timerHandler);
+	if (signal(SIGVTALRM, timerHandler) == SIG_ERR)
+	{
+		int errTmp = errno;
+		std::cerr<< SIGNAL_ERR << strerror(errTmp) << std::endl;
+		exit(1);
+	}
 
     int seconds = floor(gQuantum_usecs/(10^6) );
     int microseconds = gQuantum_usecs - seconds*(10^6);
@@ -118,6 +164,11 @@ void initTimer()
 
 int uthread_init(int quantum_usecs)
 {
+	if (quantum_usecs <= 0)
+	{
+		std::cerr << INIT_ERR << std::endl;
+		return FAILURE;
+	}
     for (int i = 1; i< MAX_THREAD_NUM; i++)
     {
         availableID.push(i);
@@ -153,6 +204,7 @@ int uthread_spawn(void (*f)(void), Priority pr)
 		gReady.push(newThread);
 		return tid;
 	}
+	std::cerr<< SPAWN_ERR << std::endl;
     return FAILURE;
 }
 
@@ -186,6 +238,7 @@ int uthread_terminate(int tid)
 	}
 	if(!gThreads.count(tid) ) //if true: thread doesn't exist
 	{
+		std::cerr<< TERMINATE_ERR << std::endl;
 		return FAILURE;
 	}
 	if(gThreads[tid]->getState() == RUNNING)//if true: deletes thread +  jumps to next thread
@@ -217,6 +270,7 @@ int uthread_suspend(int tid)
 {
 	if(tid == 0)
 	{
+		std::cerr<< BLOCK_ERR_MAIN <<std::endl;
 		return FAILURE;
 	}
 	Thread* tmp = gThreads[tid];
@@ -244,6 +298,7 @@ int uthread_suspend(int tid)
 		tmp->setState(BLOCKED);
 		return SUCCESS;
 	}
+	std::cerr << BLOCK_ERR << std::endl;
 	return FAILURE;
 }
 
@@ -251,6 +306,7 @@ int uthread_resume(int tid)
 {
 	if(!gThreads.count(tid) )
 	{
+		std::cerr << RESUME_ERR << std::endl;
 		return FAILURE;
 	}
 	Thread* tmp = gThreads[tid];
@@ -277,6 +333,11 @@ int uthread_get_total_quantums()
 
 int uthread_get_quantums(int tid)
 {
+	if(!gThreads.count(tid) )
+	{
+		std::cerr << GET_QUANTUMS_ERR << std::endl;
+		return FAILURE;
+	}
 	return gThreads[tid]->getQuantums();
 }
 

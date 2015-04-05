@@ -9,7 +9,7 @@
 #define THREAD_H_
 
 #include <setjmp.h>
-#include "uthreads.h"
+#include "general.h"
 
 
 #ifdef __x86_64__

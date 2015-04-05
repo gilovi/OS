@@ -8,10 +8,6 @@
 
 #define MAX_THREAD_NUM 100 /* maximal number of threads */
 #define STACK_SIZE 4096 /* stack size per thread (in bytes) */
-#define SUCCESS 0
-#define FAILURE -1
-
-typedef enum State { READY, RUNNING, BLOCKED, TERMINATED} State;
 
 /* External interface */
 typedef enum Priority { RED, ORANGE, GREEN } Priority;

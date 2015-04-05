@@ -29,7 +29,11 @@ Thread::Thread(int id ,void (*location)(void), Priority priority)
     sigsetjmp(_threadState, 1);
     (_threadState->__jmpbuf)[JB_SP] = translate_address(sp);
     (_threadState->__jmpbuf)[JB_PC] = translate_address(pc);
-    sigemptyset(&_threadState->__saved_mask);
+    if (sigemptyset(&_threadState->__saved_mask) == FAILURE)
+    {
+		std::cerr << SIGEMPTY_ERR << strerror(EINVAL) << std::endl;
+		exit(1);
+	}
 
 
 

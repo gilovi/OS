@@ -90,20 +90,20 @@ void switchThreads(State state)
 	//		}
 			break;
 		case BLOCKED :
-				gRunning->setState(BLOCKED);
-				gBlocked[gRunning->getID()] = gRunning;
-				retVal = sigsetjmp(*(gRunning->getThreadState() ),1);
-	//			gRunning = gReady.pop();
-	//			gRunning->setState(RUNNING);
-	//			siglongjmp(*(gRunning->getThreadState() ),1);
+			gRunning->setState(BLOCKED);
+			gBlocked[gRunning->getID()] = gRunning;
+			retVal = sigsetjmp(*(gRunning->getThreadState() ),1);
+//			gRunning = gReady.pop();
+//			gRunning->setState(RUNNING);
+//			siglongjmp(*(gRunning->getThreadState() ),1);
 			break;
 		case TERMINATED :
-				gThreads.erase(gRunning->getID() );
-				delete gRunning;
-				retVal = 0;
-	//			gRunning = gReady.pop();
-	//			gRunning->setState(RUNNING);
-	//			siglongjmp(*(gRunning->getThreadState() ),1);
+			gThreads.erase(gRunning->getID() );
+			delete gRunning;
+			retVal = 0;
+//			gRunning = gReady.pop();
+//			gRunning->setState(RUNNING);
+//			siglongjmp(*(gRunning->getThreadState() ),1);
 			break;
 		default :
 			break;
@@ -147,8 +147,8 @@ void initTimer()
 		exit(1);
 	}
 
-    int seconds = floor(gQuantum_usecs/(10^6) );
-    int microseconds = gQuantum_usecs - seconds*(10^6);
+    int seconds = floor(gQuantum_usecs/SECOND );
+    int microseconds = gQuantum_usecs - seconds*SECOND;
 
     gTimer.it_value.tv_sec = seconds;  /* first time interval, seconds part */
     gTimer.it_value.tv_usec = microseconds; /* first time interval, microseconds part */
@@ -283,6 +283,7 @@ int uthread_suspend(int tid)
 	{
 //		make scheduling decision (move to next thread)
 		switchThreads(BLOCKED);
+		return SUCCESS;
 //		gBlocked[tid] = gRunning;
 //		tmp->setState(BLOCKED);
 //		gRunning = gReady.pop();

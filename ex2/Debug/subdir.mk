@@ -6,6 +6,7 @@
 CPP_SRCS += \
 ../main.cpp \
 ../priorityList.cpp \
+../tester.cpp \
 ../thread.cpp \
 ../uthreads.cpp 
 
@@ -15,12 +16,14 @@ O_SRCS += \
 OBJS += \
 ./main.o \
 ./priorityList.o \
+./tester.o \
 ./thread.o \
 ./uthreads.o 
 
 CPP_DEPS += \
 ./main.d \
 ./priorityList.d \
+./tester.d \
 ./thread.d \
 ./uthreads.d 
 

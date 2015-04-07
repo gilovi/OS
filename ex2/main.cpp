@@ -4,6 +4,7 @@
  *  Created on: Mar 29, 2015
  *      Author: moshemandel
  */
+
 #include <iostream>
 #include <sys/time.h>
 #include <unistd.h>
@@ -14,24 +15,22 @@
 #include "thread.h"
 #include "priorityList.h"
 
-#define SECOND (10^6)
+#define SECOND 1000000
 
 using namespace std;
 
 int totalQuantums = 0;
+int suspendedThread = -1;
 
 void foo()
 {
 	while(true)
 	{
-//		usleep(SECOND);
 		if (uthread_get_total_quantums() > totalQuantums)
 		{
-			cout<<"foo: "<< uthread_get_quantums(1)<<endl;
+			cout<< "thread #: " << uthread_get_tid()  << ". foo: "<< uthread_get_quantums(uthread_get_tid())<<endl;
 			totalQuantums = uthread_get_total_quantums();
 		}
-//		cout<<"foo resuming goo"<<endl;
-//		uthread_resume(2);
 
 	}
 }
@@ -40,10 +39,81 @@ void goo()
 {
 	while(true)
 	{
-//		usleep(SECOND*0.5);
-		cout<<"goo"<<endl;
+		if (uthread_get_total_quantums() > totalQuantums)
+		{
+			cout<< "thread #: " << uthread_get_tid()  << ". goo: "<< uthread_get_quantums(uthread_get_tid() )<<endl;
+			totalQuantums = uthread_get_total_quantums();
+		}
 	}
 
+}
+
+void suspend()
+{
+	while(true)
+	{
+		if (uthread_get_total_quantums() > totalQuantums)
+		{
+			cout<< "thread #: " << uthread_get_tid()  << ". suspend: "<< uthread_get_quantums(uthread_get_tid() )<<endl;
+			totalQuantums = uthread_get_total_quantums();
+			if(uthread_get_quantums(uthread_get_tid() )%10 == 1 ) {
+				cout << "trying to suspend 1"<< endl;
+				cout << "return value of suspend: "<<uthread_suspend(1) << endl;
+			}
+			if (uthread_get_quantums(uthread_get_tid() )%10 == 6 ) {
+				cout << "trying to resume 1"<< endl;
+				cout << "return value of resume: "<<uthread_resume(1)<< endl;
+			}
+			totalQuantums = uthread_get_total_quantums();
+		}
+	}
+}
+
+void selfSuspend()
+{
+	while(true)
+	{
+		if (uthread_get_total_quantums() > totalQuantums)
+		{
+			cout<< "thread #: " << uthread_get_tid()  << ". selfSuspend: "<< uthread_get_quantums(uthread_get_tid() )<<endl;
+			totalQuantums = uthread_get_total_quantums();
+			if(uthread_get_quantums(uthread_get_tid() )%5 == 2 ) {
+				cout << "trying to suspend self"<< endl;
+				int selfTid = uthread_get_tid();
+				suspendedThread = selfTid;
+				int retVal = uthread_suspend(selfTid);
+				if (retVal == FAILURE)
+				{
+					suspendedThread = -1;
+					cout << "return value of suspend: "<< retVal<< endl;
+				}
+
+			}
+			totalQuantums = uthread_get_total_quantums();
+		}
+	}
+}
+
+void resume()
+{
+	while(true)
+	{
+		if (uthread_get_total_quantums() > totalQuantums)
+		{
+			cout<< "thread #: " << uthread_get_tid()  << ". resume: "<< uthread_get_quantums(uthread_get_tid() )<<endl;
+			if((suspendedThread != -1) && (uthread_get_quantums(uthread_get_tid() )%5 == 0 ))
+			{
+				cout << "trying to resume " << suspendedThread << endl;
+				int retVal = uthread_resume(suspendedThread);
+				cout << "return value of resume: "<< retVal << endl;
+				if (retVal == SUCCESS)
+				{
+					suspendedThread = -1;
+				}
+			}
+			totalQuantums = uthread_get_total_quantums();
+		}
+	}
 }
 
 void testList()
@@ -80,7 +150,8 @@ void testList()
 	cout<<"size: "<<list.size()<<endl;
 	cout<<"is empty? " << list.empty()<<endl;
 }
-/**
+/*
+ *
  * list of tests:
  * minimum available tid chosen?
  * terminate?
@@ -90,7 +161,37 @@ void testList()
  * getTotalQuantums?
  * getQuantums?
  * dealing with small quantums (look at question in forum)
- */
+*/
+
+// basic switch test
+void test1()
+{
+	cout << "[tester] Test 1: basic test" <<endl;
+	if (uthread_init(SECOND) != 0) {
+		cout << "[tester] ohh snap! init returned an error code" <<endl;
+	}
+	else {
+		cout <<"[tester] spawn should not return -1: " <<uthread_spawn(foo,RED)<<endl;
+		cout <<"[tester] spawn should not return -1: " <<uthread_spawn(goo,RED)<<endl;
+	}
+}
+
+void test2()
+{
+	cout << "[tester] Test 2: suspend test and resume" <<endl;
+	uthread_init(SECOND);
+	cout <<"[tester] spawn should not return -1: " <<uthread_spawn(foo,RED) <<endl;
+	cout <<"[tester] spawn should not return -1: " <<uthread_spawn(suspend,RED) <<endl;
+}
+
+void test3()
+{
+	cout << "[tester] Test 3: selfSuspend test and resume" <<endl;
+	uthread_init(SECOND);
+	cout <<"[tester] spawn should not return -1: " <<uthread_spawn(selfSuspend,RED) <<endl;
+	cout <<"[tester] spawn should not return -1: " <<uthread_spawn(resume,RED) <<endl;
+}
+
 int main()
 {
 //	std::map<char, int> myMap;
@@ -99,17 +200,18 @@ int main()
 //	cout<<count<<endl;
 //	count = myMap.erase('a');
 //	cout<<count<<endl;
+//	testList();
 
 	std::cout<<"test"<<std::endl;
-	uthread_init(20);
-	uthread_spawn(foo, RED);
-//	uthread_spawn(goo,RED);
+//	test1();
+//	test2();
+	test3();
 	while(true)
 	{
 //		usleep(SECOND);
 		if (uthread_get_total_quantums() > totalQuantums)
 		{
-			cout<<"main: "<<uthread_get_quantums(0) <<endl;
+			cout<< "thread #: " << uthread_get_tid()  << ". main: "<<uthread_get_quantums(uthread_get_tid()) <<endl;
 			totalQuantums = uthread_get_total_quantums();
 		}
 
@@ -119,5 +221,6 @@ int main()
 
 	return 0;
 }
+
 
 

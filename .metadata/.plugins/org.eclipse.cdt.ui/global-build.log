@@ -1,27 +1,43 @@
-19:51:29 **** Incremental Build of configuration Debug for project ex2 ****
+17:54:27 **** Incremental Build of configuration Debug for project ex2 ****
 make all 
 Building file: ../main.cpp
 Invoking: Cross G++ Compiler
 g++ -O0 -g3 -Wall -c -std=c++0x -fmessage-length=0 -MMD -MP -MF"main.d" -MT"main.d" -o "main.o" "../main.cpp"
 ../main.cpp: In function ‘void testList()’:
-../main.cpp:56:10: warning: unused variable ‘red4’ [-Wunused-variable]
+../main.cpp:126:10: warning: unused variable ‘red4’ [-Wunused-variable]
   Thread* red4 = new Thread(4, RED);
           ^
-../main.cpp:57:10: warning: unused variable ‘green5’ [-Wunused-variable]
+../main.cpp:127:10: warning: unused variable ‘green5’ [-Wunused-variable]
   Thread* green5 = new Thread(5, GREEN);
           ^
 Finished building: ../main.cpp
  
-Building file: ../priorityList.cpp
-Invoking: Cross G++ Compiler
-g++ -O0 -g3 -Wall -c -std=c++0x -fmessage-length=0 -MMD -MP -MF"priorityList.d" -MT"priorityList.d" -o "priorityList.o" "../priorityList.cpp"
-Finished building: ../priorityList.cpp
+Building target: ex2
+Invoking: Cross G++ Linker
+g++  -o "ex2"  ./main.o ./priorityList.o ./tester.o ./thread.o ./uthreads.o   
+Finished building target: ex2
  
-Building file: ../thread.cpp
+17:55:09 **** Incremental Build of configuration Debug for project ex2 ****
+make all 
+Building file: ../main.cpp
 Invoking: Cross G++ Compiler
-g++ -O0 -g3 -Wall -c -std=c++0x -fmessage-length=0 -MMD -MP -MF"thread.d" -MT"thread.d" -o "thread.o" "../thread.cpp"
-Finished building: ../thread.cpp
+g++ -O0 -g3 -Wall -c -std=c++0x -fmessage-length=0 -MMD -MP -MF"main.d" -MT"main.d" -o "main.o" "../main.cpp"
+../main.cpp: In function ‘void testList()’:
+../main.cpp:126:10: warning: unused variable ‘red4’ [-Wunused-variable]
+  Thread* red4 = new Thread(4, RED);
+          ^
+../main.cpp:127:10: warning: unused variable ‘green5’ [-Wunused-variable]
+  Thread* green5 = new Thread(5, GREEN);
+          ^
+Finished building: ../main.cpp
  
+Building target: ex2
+Invoking: Cross G++ Linker
+g++  -o "ex2"  ./main.o ./priorityList.o ./tester.o ./thread.o ./uthreads.o   
+Finished building target: ex2
+ 
+17:59:04 **** Incremental Build of configuration Debug for project ex2 ****
+make all 
 Building file: ../uthreads.cpp
 Invoking: Cross G++ Compiler
 g++ -O0 -g3 -Wall -c -std=c++0x -fmessage-length=0 -MMD -MP -MF"uthreads.d" -MT"uthreads.d" -o "uthreads.o" "../uthreads.cpp"
@@ -29,9 +45,40 @@ Finished building: ../uthreads.cpp
  
 Building target: ex2
 Invoking: Cross G++ Linker
-g++  -o "ex2"  ./main.o ./priorityList.o ./thread.o ./uthreads.o   
+g++  -o "ex2"  ./main.o ./priorityList.o ./tester.o ./thread.o ./uthreads.o   
 Finished building target: ex2
  
-19:51:43 **** Incremental Build of configuration Debug for project ex2 ****
+18:01:32 **** Incremental Build of configuration Debug for project ex2 ****
 make all 
 make: Nothing to be done for 'all'.
+18:02:11 **** Incremental Build of configuration Debug for project ex2 ****
+make all 
+Building file: ../main.cpp
+Invoking: Cross G++ Compiler
+g++ -O0 -g3 -Wall -c -std=c++0x -fmessage-length=0 -MMD -MP -MF"main.d" -MT"main.d" -o "main.o" "../main.cpp"
+../main.cpp: In function ‘void testList()’:
+../main.cpp:126:10: warning: unused variable ‘red4’ [-Wunused-variable]
+  Thread* red4 = new Thread(4, RED);
+          ^
+../main.cpp:127:10: warning: unused variable ‘green5’ [-Wunused-variable]
+  Thread* green5 = new Thread(5, GREEN);
+          ^
+Finished building: ../main.cpp
+ 
+Building target: ex2
+Invoking: Cross G++ Linker
+g++  -o "ex2"  ./main.o ./priorityList.o ./tester.o ./thread.o ./uthreads.o   
+Finished building target: ex2
+ 
+18:05:06 **** Incremental Build of configuration Debug for project ex2 ****
+make all 
+Building file: ../uthreads.cpp
+Invoking: Cross G++ Compiler
+g++ -O0 -g3 -Wall -c -std=c++0x -fmessage-length=0 -MMD -MP -MF"uthreads.d" -MT"uthreads.d" -o "uthreads.o" "../uthreads.cpp"
+Finished building: ../uthreads.cpp
+ 
+Building target: ex2
+Invoking: Cross G++ Linker
+g++  -o "ex2"  ./main.o ./priorityList.o ./tester.o ./thread.o ./uthreads.o   
+Finished building target: ex2
+ 

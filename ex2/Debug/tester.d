@@ -1,0 +1,1 @@
+tester.d: ../tester.cpp

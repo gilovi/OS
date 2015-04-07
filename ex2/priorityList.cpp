@@ -28,17 +28,17 @@ Thread* PriorityList::pop()
 	Thread* next;
 	if (!_red.empty() )
 	{
-		next = _red.front();
+		next = _red.back();
 		_red.pop_back();
 	}
 	else if (!_orange.empty() )
 	{
-		next = _orange.front();
+		next = _orange.back();
 		_orange.pop_back();
 	}
 	else if (!_green.empty() )
 	{
-		next = _green.front();
+		next = _green.back();
 		_green.pop_back();
 	}
 	else

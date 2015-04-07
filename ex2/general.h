@@ -16,6 +16,8 @@
 #define SUCCESS 0
 #define FAILURE -1
 
+#define SECOND 1000000
+
 #define INIT_ERR "thread library error: init function -- non-positive quantum length value."
 #define SPAWN_ERR "thread library error: spawn function -- number of concurrent is exceeded."
 #define TERMINATE_ERR "thread library error: terminate function -- thread does not exist."

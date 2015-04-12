@@ -16,11 +16,12 @@
 #include "priorityList.h"
 
 #define SECOND 1000000
-
+#define RUNS 3
 using namespace std;
 
 int totalQuantums = 0;
 int suspendedThread = -1;
+
 
 void foo()
 {
@@ -30,6 +31,10 @@ void foo()
 		{
 			cout<< "thread #: " << uthread_get_tid()  << ". foo: "<< uthread_get_quantums(uthread_get_tid())<<endl;
 			totalQuantums = uthread_get_total_quantums();
+		}
+		if (uthread_get_quantums(uthread_get_tid()) > RUNS)
+		{
+            uthread_terminate(uthread_get_tid());
 		}
 
 	}
@@ -44,6 +49,11 @@ void goo()
 			cout<< "thread #: " << uthread_get_tid()  << ". goo: "<< uthread_get_quantums(uthread_get_tid() )<<endl;
 			totalQuantums = uthread_get_total_quantums();
 		}
+		if (uthread_get_quantums(uthread_get_tid()) > RUNS)
+		{
+            uthread_terminate(uthread_get_tid());
+		}
+
 	}
 
 }
@@ -66,6 +76,11 @@ void suspend()
 			}
 			totalQuantums = uthread_get_total_quantums();
 		}
+		if (uthread_get_quantums(uthread_get_tid()) > RUNS)
+		{
+            uthread_terminate(uthread_get_tid());
+		}
+
 	}
 }
 
@@ -91,6 +106,10 @@ void selfSuspend()
 			}
 			totalQuantums = uthread_get_total_quantums();
 		}
+		if (uthread_get_quantums(uthread_get_tid()) > RUNS)
+		{
+            uthread_terminate(uthread_get_tid());
+        }
 	}
 }
 
@@ -114,6 +133,10 @@ void selfTerminate()
 
 			}
 		}
+		if (uthread_get_quantums(uthread_get_tid()) > RUNS)
+		{
+            uthread_terminate(uthread_get_tid());
+		}
     }
 
 }
@@ -127,7 +150,12 @@ void whatsMyId()
             cout<< "thread #: " << uthread_get_tid()  << ". whatsMyId: "<< uthread_get_quantums(uthread_get_tid() )<<endl;
             cout<< "My Id is: "<<uthread_get_tid() << endl;
         }
+        if (uthread_get_quantums(uthread_get_tid()) > RUNS)
+		{
+            uthread_terminate(uthread_get_tid());
+		}
     }
+
 }
 
 void resume()
@@ -149,6 +177,10 @@ void resume()
 			}
 			totalQuantums = uthread_get_total_quantums();
 		}
+		if (uthread_get_quantums(uthread_get_tid()) > RUNS)
+		{
+            uthread_terminate(uthread_get_tid());
+		}
 	}
 }
 void nest2()
@@ -159,12 +191,16 @@ while(true)
 		{
 		    totalQuantums = uthread_get_total_quantums();
 			cout<< "thread #: " << uthread_get_tid()  << ". nest2: "<< uthread_get_quantums(uthread_get_tid() )<<endl;
-			if(uthread_get_quantums(uthread_get_tid() ) == 5 )
+			if(uthread_get_quantums(uthread_get_tid() ) == 3 )
             {
                 uthread_spawn(foo,RED);
             }
 
         }
+        if (uthread_get_quantums(uthread_get_tid()) > RUNS)
+		{
+            uthread_terminate(uthread_get_tid());
+		}
     }
 
 }
@@ -177,12 +213,16 @@ while(true)
 		{
 		    totalQuantums = uthread_get_total_quantums();
 			cout<< "thread #: " << uthread_get_tid()  << ". nest1: "<< uthread_get_quantums(uthread_get_tid() )<<endl;
-			if(uthread_get_quantums(uthread_get_tid() ) == 5 )
+			if(uthread_get_quantums(uthread_get_tid() ) == 3 )
             {
                 uthread_spawn(nest2,RED);
             }
 
         }
+        if (uthread_get_quantums(uthread_get_tid()) > RUNS)
+		{
+            uthread_terminate(uthread_get_tid());
+		}
 }
 
 }
@@ -204,6 +244,10 @@ void suspendMain()
             cout<< "thread #: " << uthread_get_tid()  << ". suspendMain: "<< uthread_get_quantums(uthread_get_tid() )<<endl;
             cout<< "suspending main returns: "<<uthread_suspend(0)<< endl;
         }
+        if (uthread_get_quantums(uthread_get_tid()) > RUNS)
+		{
+            uthread_terminate(uthread_get_tid());
+		}
     }
 }
 
@@ -260,6 +304,7 @@ void test1()
 	cout << "[tester] Test 1: basic test" <<endl;
 	if (uthread_init(SECOND) != 0) {
 		cout << "[tester] ohh snap! init returned an error code" <<endl;
+		exit(-1);
 	}
 	else {
 		cout <<"[tester] spawn should not return -1: " <<uthread_spawn(foo,RED)<<endl;
@@ -340,8 +385,9 @@ void test8()
     uthread_suspend(suspend);
     uthread_terminate(terminate);
 
-    cout << "terminating. should return 0" << uthread_terminate(suspend) << endl;
     cout << "double check. trying to resume the terminated:" << uthread_resume(suspend) << endl;
+    cout << "terminating. should return 0" << uthread_terminate(suspend) << endl;
+
 
 }
 
@@ -366,13 +412,16 @@ void err3()
 {
     cout << "[tester] err3: Thread Overflow" <<endl;
 	uthread_init(SECOND);
-	for (int i = 1 ; MAX_THREAD_NUM -1 ; i++)
+	for (int i = 1 ; i < MAX_THREAD_NUM ; i++)
     {
         cout << "spawn thread #" << i << endl;
-        cout <<"[tester] spawn should not return -1: " <<uthread_spawn(foo,RED) <<endl;
+        cout <<"[tester] spawn should not return -1: " <<uthread_spawn(foo,ORANGE) <<endl;
     }
-    cout << "spawn thread #" << MAX_THREAD_NUM << endl;
-        cout <<"[tester] spawn SHOULD return -1: " <<uthread_spawn(foo,RED) <<endl;
+    cout << "spawn thread #" << MAX_THREAD_NUM  << endl;
+    int ret = uthread_spawn(foo,ORANGE);
+    cout <<"[tester] spawn SHOULD return -1: " << ret <<endl;
+   // if (ret == -1) exit(0);
+
 }
 
 void err4()
@@ -384,21 +433,24 @@ void err4()
 void err5()
 {
     cout << "[tester] err5: wrong id" << endl;
+    uthread_init(SECOND);
 	//some other threads:
     int suspend = uthread_spawn(foo,RED);
     cout <<"[tester] spawn should not return -1: " << suspend << endl;
-    int terminate = uthread_spawn(foo,GREEN);
-    cout <<"[tester] spawn should not return -1: " << terminate << endl;
+    int ter = uthread_spawn(foo,GREEN);
+    cout <<"[tester] spawn should not return -1: " << ter << endl;
     int ready = uthread_spawn(goo,ORANGE);
     cout <<"[tester] spawn should not return -1: " <<ready << endl;
 
+    cout <<"suspending" <<endl;
     uthread_suspend(suspend);
-    uthread_terminate(terminate);
+    cout <<"terminating" <<endl;
+    uthread_terminate(ter);
 
-    cout << "wrong suspend:" << uthread_suspend(terminate);
-    cout << "wrong terminate:" << uthread_terminate(terminate);
-    cout << "wrong resume:" << uthread_resume(terminate);
-    cout << "wrong get quantums:" << uthread_get_quantums(10);
+    cout << "wrong suspend: " << uthread_suspend(ter) << endl;
+    cout << "wrong terminate: " << uthread_terminate(ter)<< endl;
+    cout << "wrong resume: " << uthread_resume(ter)<< endl;
+    cout << "wrong get quantums: " << uthread_get_quantums(ter)<< endl;
 }
 
 int main()
@@ -412,20 +464,20 @@ int main()
 //	testList();
 
 	std::cout<<"test"<<std::endl;
-//	test1();
+	test1();
 //	test2();
 //	test3();
-//  test4();
-//  test5();
-//  test6();
-//  test7();
-//  test8();
+//  test4(); //pass
+//  test5(); // pass
+//  test6(); //pass
+//  test7(); //pass
+//  test8(); // pass
 
-//  err1();
-//  err2();
-//  err3();
-//  err4();
-//  err5();
+//  err1();//pass
+//  err2();//pass
+// err3(); //pass
+//  err4();//pass
+//err5(); //fail
 
 
 	while(true)
@@ -435,6 +487,10 @@ int main()
 		{
 			cout<< "thread #: " << uthread_get_tid()  << ". main: "<<uthread_get_quantums(uthread_get_tid()) <<endl;
 			totalQuantums = uthread_get_total_quantums();
+		}
+		if (uthread_get_quantums(uthread_get_tid()) > RUNS + 1)
+		{
+            uthread_terminate(uthread_get_tid());
 		}
 
 //		cout<<"main suspending goo"<<endl;

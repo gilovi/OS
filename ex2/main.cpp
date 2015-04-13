@@ -15,7 +15,7 @@
 #include "thread.h"
 #include "priorityList.h"
 
-#define SECOND 1000000
+#define SECOND 100000
 #define RUNS 3
 using namespace std;
 
@@ -464,7 +464,7 @@ int main()
 //	testList();
 
 	std::cout<<"test"<<std::endl;
-	test1();
+//	test1();
 //	test2();
 //	test3();
 //  test4(); //pass
@@ -472,7 +472,7 @@ int main()
 //  test6(); //pass
 //  test7(); //pass
 //  test8(); // pass
-
+//
 //  err1();//pass
 //  err2();//pass
 // err3(); //pass

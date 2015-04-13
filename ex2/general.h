@@ -27,6 +27,7 @@
 #define GET_QUANTUMS_ERR "thread library error: get_quantums function -- thread does not exist."
 
 #define SIGNAL_ERR "system error: signal function -- "
+#define SIGACTION_ERR "system error: sigaction function."
 #define SIGEMPTY_ERR "system error: sigemptyset function."
 #define SIGADD_ERR	"system error: sigaddset function."
 #define SIGPROCMASK_ERR "system error: sigprocmask function -- "

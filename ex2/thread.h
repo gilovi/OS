@@ -1,6 +1,9 @@
 /*
  * thread.h
  *
+ * represents a thread in uthreads library.
+ * holds relevant data.
+ *
  *  Created on: Mar 19, 2015
  *      Author: moshemandel
  */
@@ -31,26 +34,35 @@ class Thread
 {
 public:
 
+//constructors
 	Thread(int id, Priority priority);
 
 	Thread(int id ,void (*location)(void), Priority priority);
 
+//	destructor
 	~Thread();
 
 	int getID() const;
 
+//	get thread stack (which holds current data/registers of thread)
 	char* getStack() const;
 
+//	get thread state (as set by sigsetjmp)
 	sigjmp_buf* getThreadState() ;
 
+//	return number of quantums where thread was active
 	int getQuantums() const;
 
+//	increase by 1
 	void increaseQuantum();
 
+//	return priority (RED,ORANGE,GREEN)
 	Priority getPriority() const;
 
+//	set state (READY, RUNNING, BLOCKED, TERMINATED)
 	void setState(State state);
 
+//	return state (READY, RUNNING, BLOCKED, TERMINATED)
 	State getState() const;
 
 

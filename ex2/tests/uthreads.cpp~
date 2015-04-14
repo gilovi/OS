@@ -11,6 +11,8 @@
 #include <signal.h>
 #include <sys/time.h>
 #include <cmath>
+#include <stdlib.h>
+#include<stddef.h>
 #include <map>
 #include "thread.h"
 #include "priorityList.h"
@@ -19,9 +21,12 @@ int gTotalQuantums;
 int gQuantum_usecs;
 struct sigaction gAct;
 sigset_t gSignalSet;
-
+//TODO: is it necessary to hold a container for all thread pointers? or is it enough to hold gReady,gRunning & gBlocked?
+//		consider what to do when deleting a thread...
+//Thread* gThreads[MAX_THREAD_NUM];
 std::map<int, Thread*> gThreads;
 Thread* gRunning;
+//Thread* gBlocked[MAX_THREAD_NUM];
 std::map<int, Thread*> gBlocked;
 PriorityList gReady;
 std::priority_queue<int, std::vector<int>, std::greater<int> > gAvailableID;
@@ -68,17 +73,39 @@ void switchThreads(State state)
 			gReady.push(gRunning);
 			gRunning->setState(READY);
 			retVal = sigsetjmp(*(gRunning->getThreadState() ),1);
+	//		if (!gReady.empty() )
+	//		{
+	//			Thread *next = gReady.pop();
+	//			gReady.push(gRunning);
+	//			gRunning->setState(READY);
+	//			if (!sigsetjmp(*(gRunning->getThreadState() ),1) )
+	//			{
+	//				gRunning = next;
+	//				next->setState(RUNNING);
+	//				gRunning->increaseQuantum();
+	//				siglongjmp(*(gRunning->getThreadState() ),1);
+	//			}
+	//		}
+	//		else
+	//		{
+	//			gRunning->increaseQuantum();
+	//		}
 			break;
 		case BLOCKED :
 			gRunning->setState(BLOCKED);
 			gBlocked[gRunning->getID()] = gRunning;
 			retVal = sigsetjmp(*(gRunning->getThreadState() ),1);
+//			gRunning = gReady.pop();
+//			gRunning->setState(RUNNING);
+//			siglongjmp(*(gRunning->getThreadState() ),1);
 			break;
 		case TERMINATED :
 			gThreads.erase(gRunning->getID() );
-			gAvailableID.push(gRunning->getID() );
 			delete gRunning;
 			retVal = 0;
+//			gRunning = gReady.pop();
+//			gRunning->setState(RUNNING);
+//			siglongjmp(*(gRunning->getThreadState() ),1);
 			break;
 		default :
 			break;
@@ -108,6 +135,13 @@ void timerHandler(int sig)
 
 void initTimer()
 {
+//	if (signal(SIGVTALRM, timerHandler) == SIG_ERR)
+//	{
+//		int errTmp = errno;
+//		std::cerr<< SIGNAL_ERR << strerror(errTmp) << std::endl;
+//		exit(1);
+//	}
+
     int seconds = floor(gQuantum_usecs/SECOND );
     int microseconds = gQuantum_usecs - seconds*SECOND;
 
@@ -115,6 +149,12 @@ void initTimer()
     gTimer.it_value.tv_usec = microseconds; /* first time interval, microseconds part */
     gTimer.it_interval.tv_sec = seconds;  /* following time intervals, seconds part */
     gTimer.it_interval.tv_usec = microseconds; /* following time intervals, microseconds part */
+
+//    setitimer(ITIMER_VIRTUAL, &gTimer, NULL);
+
+//    gRunning = gReady.pop();
+//    siglongjmp(*(gRunning->getThreadState() ),1);
+
 }
 
 int uthread_init(int quantum_usecs)
@@ -133,7 +173,6 @@ int uthread_init(int quantum_usecs)
 	Thread *mainThread = new Thread(0, ORANGE);
 	gThreads[0] = mainThread;
 
-//	initialize signal handler
 	gAct.sa_handler = timerHandler;
 	if (sigemptyset(&gAct.sa_mask)== FAILURE)
 	{
@@ -149,8 +188,7 @@ int uthread_init(int quantum_usecs)
 
 	initTimer();
 	gRunning = mainThread;
-	mainThread->setState(RUNNING);
-	switchThreads(RUNNING);
+	switchThreads(READY);
 
 	// create sigset for blocking signals later on
 	if (sigemptyset(&gSignalSet) == FAILURE)
@@ -164,6 +202,17 @@ int uthread_init(int quantum_usecs)
 		exit(1);
 	}
 
+
+
+//	mainThread->increaseQuantum();
+//    if (!sigsetjmp(*(mainThread->getThreadState() ),1))
+//    {
+//        gReady.push(mainThread);
+//        initTimer();
+//    }
+
+
+//	TODO: what is considered a failure? -- when do we return (-1)?
 	return SUCCESS;
 }
 
@@ -187,39 +236,31 @@ int uthread_spawn(void (*f)(void), Priority pr)
 
 int uthread_terminate(int tid)
 {
-	blockTimer();
+	//blockTimer();
 	if(tid == 0)//if true: exits program
 	{
 //		terminate all threads:
 		std::map<int, Thread*>::iterator threadIt;
 		for (threadIt = gThreads.begin(); threadIt != gThreads.end(); ++threadIt)
 		{
-			Thread* tmp;
 			switch(threadIt->second->getState() )
 			{
 			case(READY) :
 					gReady.remove(threadIt->second->getID() );
-					tmp = gThreads[threadIt->second->getID() ];
-					gThreads.erase(threadIt);
-					delete tmp;
 					break;
 			case(RUNNING) :
-					gThreads.erase(threadIt);
-//					gRunning = NULL;
+					gRunning = NULL;
 					break;
 			case(BLOCKED) :
 					gBlocked.erase(threadIt->second->getID() );
-					tmp = gThreads[threadIt->second->getID() ];
-					gThreads.erase(threadIt);
-					delete tmp;
 					break;
 			default :
 				break;
 			}
-
+			Thread* tmp = gThreads[threadIt->second->getID() ];
+			gThreads.erase(threadIt);
+			delete tmp;
 		}
-		delete gRunning;
-		gRunning = NULL;
 		resumeTimer();
 		exit(0);
 	}
@@ -231,7 +272,13 @@ int uthread_terminate(int tid)
 	}
 	if(gThreads[tid]->getState() == RUNNING)//if true: deletes thread +  jumps to next thread
 	{
+//		gRunning = gReady.pop();
+//		gRunning->setState(RUNNING);
+//		Thread* tmp = gThreads[tid];
+//		gThreads.erase(tid);
+//		delete tmp;
 		switchThreads(TERMINATED);
+//		siglongjmp(*(gRunning->getThreadState() ),1);
 	}
 //	if in ready or blocked: remove from lists (gReady/gBlocked + gThreads), and delete thread
 	Thread* tmp = gThreads[tid];
@@ -246,7 +293,7 @@ int uthread_terminate(int tid)
 	gThreads.erase(tid);
 	gAvailableID.push(tid);
 	delete tmp;
-	resumeTimer();
+	//resumeTimer();
 	return SUCCESS;
 }
 
@@ -278,6 +325,12 @@ int uthread_suspend(int tid)
 		switchThreads(BLOCKED);
 		resumeTimer();
 		return SUCCESS;
+//		gBlocked[tid] = gRunning;
+//		tmp->setState(BLOCKED);
+//		gRunning = gReady.pop();
+//		gRunning->setState(RUNNING);
+//		setitimer(ITIMER_VIRTUAL, &gTimer, NULL);
+//		siglongjmp(*(gRunning->getThreadState() ),1);
 	}
 	if(tmp->getState() == READY )
 	{
@@ -297,7 +350,6 @@ int uthread_resume(int tid)
 {
 	blockTimer();
 	if(gThreads.count(tid) == 0)
-//		thread does not exist -- error
 	{
 		std::cerr << RESUME_ERR << std::endl;
 		resumeTimer();
@@ -342,3 +394,38 @@ int uthread_get_quantums(int tid)
 	resumeTimer();
 	return gThreads[tid]->getQuantums();
 }
+
+#ifdef __x86_64__
+/* code for 64 bit Intel arch */
+
+/* A translation is required when using an address of a variable.
+   Use this as a black box in your code. */
+address_t translate_address(address_t addr)
+{
+    address_t ret;
+    asm volatile("xor    %%fs:0x30,%0\n"
+		"rol    $0x11,%0\n"
+                 : "=g" (ret)
+                 : "0" (addr));
+    return ret;
+}
+
+#else
+/* code for 32 bit Intel arch */
+
+/* A translation is required when using an address of a variable.
+   Use this as a black box in your code. */
+address_t translate_address(address_t addr)
+{
+    address_t ret;
+    asm volatile("xor    %%gs:0x18,%0\n"
+		"rol    $0x9,%0\n"
+                 : "=g" (ret)
+                 : "0" (addr));
+    return ret;
+}
+
+
+
+
+#endif

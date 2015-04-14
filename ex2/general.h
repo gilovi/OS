@@ -1,5 +1,6 @@
 /*
  * general.h
+ * contains general macros and data for program
  *
  *  Created on: Mar 30, 2015
  *      Author: moshemandel

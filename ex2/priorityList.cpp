@@ -55,17 +55,14 @@ void PriorityList::push(Thread* thread)
 	{
 	case RED :
 		_red.push_front(thread);
-//		threadData tmp = {RED, _red.begin()};
 		_idMap[thread->getID()] = {RED, _red.begin()};
 		break;
 	case ORANGE :
 		_orange.push_front(thread);
-//		threadData tmp = {ORANGE, _orange.begin()};
 		_idMap[thread->getID()] = {ORANGE, _orange.begin()};
 		break;
 	case GREEN :
 		_green.push_front(thread);
-//		threadData tmp = {GREEN, _green.begin()};
 		_idMap[thread->getID()] = {GREEN, _green.begin()};
 		break;
 	default :

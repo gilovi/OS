@@ -15,7 +15,7 @@
 #include "thread.h"
 #include "priorityList.h"
 
-#define SECOND 100000
+#define QUANTUM_LENGTH 100000
 #define RUNS 3
 using namespace std;
 
@@ -56,6 +56,14 @@ void goo()
 
 	}
 
+}
+
+void loop()
+{
+	while(true)
+	{
+		cout<<"loop"<<endl;
+	}
 }
 
 void suspend()
@@ -258,8 +266,6 @@ void testList()
 	Thread* red1 = new Thread(1, RED);
 	Thread* green2 = new Thread(2, GREEN);
 	Thread* orange3 = new Thread(3, ORANGE);
-	Thread* red4 = new Thread(4, RED);
-	Thread* green5 = new Thread(5, GREEN);
 	cout<<"size: "<<list.size()<<endl;
 	cout<<"push orange0."<<endl;
 	list.push(orange0);
@@ -302,7 +308,7 @@ void testList()
 void test1()
 {
 	cout << "[tester] Test 1: basic test" <<endl;
-	if (uthread_init(SECOND) != 0) {
+	if (uthread_init(QUANTUM_LENGTH) != 0) {
 		cout << "[tester] ohh snap! init returned an error code" <<endl;
 		exit(-1);
 	}
@@ -315,7 +321,7 @@ void test1()
 void test2()
 {
 	cout << "[tester] Test 2: suspend test and resume" <<endl;
-	uthread_init(SECOND);
+	uthread_init(QUANTUM_LENGTH);
 	cout <<"[tester] spawn should not return -1: " <<uthread_spawn(foo,RED) <<endl;
 	cout <<"[tester] spawn should not return -1: " <<uthread_spawn(suspend,RED) <<endl;
 }
@@ -323,14 +329,14 @@ void test2()
 void test3()
 {
 	cout << "[tester] Test 3: selfSuspend test and resume" <<endl;
-	uthread_init(SECOND);
+	uthread_init(QUANTUM_LENGTH);
 	cout <<"[tester] spawn should not return -1: " <<uthread_spawn(selfSuspend,RED) <<endl;
 	cout <<"[tester] spawn should not return -1: " <<uthread_spawn(resume,RED) <<endl;
 }
 void test4()
 {
     cout << "[tester] Test 4: self Terminate test" <<endl;
-	uthread_init(SECOND);
+	uthread_init(QUANTUM_LENGTH);
 	cout <<"[tester] spawn should not return -1: " <<uthread_spawn(selfTerminate,RED) <<endl;
 
 }
@@ -338,7 +344,7 @@ void test4()
 void test5()
 {
     cout << "[tester] Test 5: enumuration check (id should be 1)" <<endl;
-	uthread_init(SECOND);
+	uthread_init(QUANTUM_LENGTH);
 	cout <<"[tester] spawn should not return -1: " <<uthread_spawn(foo,RED) <<endl;
 	cout <<"[tester] spawn should not return -1: " <<uthread_spawn(goo,RED) <<endl;
 	uthread_terminate(1);
@@ -348,14 +354,14 @@ void test5()
 void test6()
 {
     cout << "[tester] Test 6: nested spawn" <<endl;
-	uthread_init(SECOND);
+//	uthread_init(QUANTUM_LENGTH);
 	cout <<"[tester] spawn should not return -1: " <<uthread_spawn(nest1,GREEN) <<endl;
 }
 
 void test7()
 {
     cout << "[tester] Test 7: resume running thread" << endl;
-    uthread_init(SECOND);
+//    uthread_init(QUANTUM_LENGTH);
     //some other threads:
     int suspend = uthread_spawn(foo,RED);
     cout <<"[tester] spawn should not return -1: " << suspend << endl;
@@ -373,7 +379,7 @@ void test8()
 {
 
     cout << "[tester] Test 8: terminating suspended thread" << endl;
-    uthread_init(SECOND);
+    uthread_init(QUANTUM_LENGTH);
     //some other threads:
     int suspend = uthread_spawn(foo,RED);
     cout << "[tester] spawn should not return -1: " << suspend << endl;
@@ -388,14 +394,22 @@ void test8()
     cout << "double check. trying to resume the terminated:" << uthread_resume(suspend) << endl;
     cout << "terminating. should return 0" << uthread_terminate(suspend) << endl;
 
+}
 
+void test9()
+{
+	uthread_init(100);
+//	int red1 = uthread_spawn(loop,RED);
+//	int quantums1 = uthread_get_quantums(1);
+//	cout << "quantums1: " << quantums1 << endl;
+//	cout<< "suspend return value: " <<suspend <<endl;
 }
 
 // error testes//
 void err1()
 {
 cout << "[tester] err1: main termination" <<endl;
-	uthread_init(SECOND);
+	uthread_init(QUANTUM_LENGTH);
 	cout <<"[tester] spawn should not return -1: " <<uthread_spawn(foo,RED) <<endl;
 	cout <<"[tester] spawn should not return -1: " <<uthread_spawn(foo,GREEN) <<endl;
 	cout <<"[tester] spawn should not return -1: " <<uthread_spawn(terminateMain,ORANGE) <<endl;
@@ -403,7 +417,7 @@ cout << "[tester] err1: main termination" <<endl;
 void err2()
 {
 cout << "[tester] err2: main suspend" <<endl;
-	uthread_init(SECOND);
+	uthread_init(QUANTUM_LENGTH);
 	cout <<"[tester] spawn should not return -1: " <<uthread_spawn(foo,RED) <<endl;
 	cout <<"[tester] spawn should not return -1: " <<uthread_spawn(foo,GREEN) <<endl;
 	cout <<"[tester] spawn should not return -1: " <<uthread_spawn(suspendMain,ORANGE) <<endl;
@@ -411,7 +425,7 @@ cout << "[tester] err2: main suspend" <<endl;
 void err3()
 {
     cout << "[tester] err3: Thread Overflow" <<endl;
-	uthread_init(SECOND);
+	uthread_init(QUANTUM_LENGTH);
 	for (int i = 1 ; i < MAX_THREAD_NUM ; i++)
     {
         cout << "spawn thread #" << i << endl;
@@ -433,7 +447,7 @@ void err4()
 void err5()
 {
     cout << "[tester] err5: wrong id" << endl;
-    uthread_init(SECOND);
+    uthread_init(QUANTUM_LENGTH);
 	//some other threads:
     int suspend = uthread_spawn(foo,RED);
     cout <<"[tester] spawn should not return -1: " << suspend << endl;
@@ -464,15 +478,17 @@ int main()
 //	testList();
 
 	std::cout<<"test"<<std::endl;
+//	uthread_init(QUANTUM_LENGTH);
 //	test1();
 //	test2();
 //	test3();
 //  test4(); //pass
 //  test5(); // pass
 //  test6(); //pass
-//  test7(); //pass
-//  test8(); // pass
-//
+//  test7(); //failed sometimes ?!?!
+  test8(); // pass
+//	test9();
+////
 //  err1();//pass
 //  err2();//pass
 // err3(); //pass
@@ -482,7 +498,6 @@ int main()
 
 	while(true)
 	{
-//		usleep(SECOND);
 		if (uthread_get_total_quantums() > totalQuantums)
 		{
 			cout<< "thread #: " << uthread_get_tid()  << ". main: "<<uthread_get_quantums(uthread_get_tid()) <<endl;

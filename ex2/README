@@ -3,9 +3,22 @@ Moshe Mandel 301117800, Gilad Ovits 300604493
 EX: 2
 
 FILES:
-
-
-REMARKS:
+thread		a data structure thats represents a thread.
+priorityList	priority queue of thread pointers which uses the priority's colors.
+uthreads	the requseted user thread library.
+general.h	general includes and defines.
+Makefile 	the makefile for the exercise.
+README		this file.
 
 
 ANSWERS:
+1.
+RR pro & PQ con: approximating the ideal parallel processing by sharing the processor time. in PQ
+schedueling is linear so it is far from ideal in general case. 
+RR con & PQ pro: mark certain task as more important. (impossible and possible respectedly) 
+in our implementation there is possiblity to set priority, on the price that threads might get
+starved, but without loosing the very good time sharing approximatation.
+
+2.
+A simple case is when a user asks for opening a file. the time to get data from the HDD is
+significantly slower than the processor's clock, so the OS will probably block it until it's done.

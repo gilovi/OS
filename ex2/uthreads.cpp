@@ -19,6 +19,7 @@
 
 int gTotalQuantums;
 int gQuantum_usecs;
+sigset_t gSignalSet;
 //TODO: is it necessary to hold a container for all thread pointers? or is it enough to hold gReady,gRunning & gBlocked?
 //		consider what to do when deleting a thread...
 //Thread* gThreads[MAX_THREAD_NUM];
@@ -27,7 +28,7 @@ Thread* gRunning;
 //Thread* gBlocked[MAX_THREAD_NUM];
 std::map<int, Thread*> gBlocked;
 PriorityList gReady;
-std::priority_queue<int, std::vector<int>, std::greater<int> > availableID;
+std::priority_queue<int, std::vector<int>, std::greater<int> > gAvailableID;
 
 struct itimerval gTimer;
 
@@ -35,18 +36,7 @@ struct itimerval gTimer;
 void switchThreads(State state)
 {
 //	block timer
-	sigset_t signalSet;
-	if (sigemptyset(&signalSet) == FAILURE)
-	{
-		std::cerr << SIGEMPTY_ERR << strerror(EINVAL) << std::endl;
-		exit(1);
-	}
-	if (sigaddset(&signalSet,SIGVTALRM) == FAILURE)
-	{
-		std::cerr << SIGADD_ERR << strerror(EINVAL) << std::endl;
-		exit(1);
-	}
-	if(sigprocmask(SIG_BLOCK,&signalSet,NULL) == FAILURE)
+	if(sigprocmask(SIG_BLOCK,&gSignalSet,NULL) == FAILURE)
 	{
 		int errTmp = errno;
 		std::cerr<< SIGPROCMASK_ERR << strerror(errTmp) << " -- tried to block" <<std::endl;
@@ -119,17 +109,18 @@ void switchThreads(State state)
 
 
 //    resume timer
-	if (sigprocmask(SIG_UNBLOCK,&signalSet,NULL) == FAILURE)
+	/*if (sigprocmask(SIG_UNBLOCK,&gSignalSet,NULL) == FAILURE)
 	{
 		int errTmp = errno;
 		std::cerr<< SIGPROCMASK_ERR << strerror(errTmp) << " -- tried to unblock" << std::endl;
 		exit(1);
-	}
+	}*/
 	if (setitimer(ITIMER_VIRTUAL, &gTimer, NULL) == FAILURE)
 	{
 		int errTmp = errno;
 		std::cerr<< SETITIMER_ERR << strerror(errTmp) << std::endl;
 		exit(1);
+
 	}
 }
 
@@ -169,9 +160,9 @@ int uthread_init(int quantum_usecs)
 		std::cerr << INIT_ERR << std::endl;
 		return FAILURE;
 	}
-    for (int i = 1; i< MAX_THREAD_NUM; i++)
+    for (int i = 1; i< MAX_THREAD_NUM +1; i++)
     {
-        availableID.push(i);
+        gAvailableID.push(i);
     }
 	gQuantum_usecs = quantum_usecs;
 	gTotalQuantums = 0;
@@ -181,6 +172,21 @@ int uthread_init(int quantum_usecs)
 	initTimer();
 	gRunning = mainThread;
 	switchThreads(READY);
+
+	// create sigset for blocking signals later on
+	if (sigemptyset(&gSignalSet) == FAILURE)
+	{
+		std::cerr << SIGEMPTY_ERR << strerror(EINVAL) << std::endl;
+		exit(1);
+	}
+	if (sigaddset(&gSignalSet,SIGVTALRM) == FAILURE)
+	{
+		std::cerr << SIGADD_ERR << strerror(EINVAL) << std::endl;
+		exit(1);
+	}
+
+
+
 //	mainThread->increaseQuantum();
 //    if (!sigsetjmp(*(mainThread->getThreadState() ),1))
 //    {
@@ -195,12 +201,12 @@ int uthread_init(int quantum_usecs)
 
 int uthread_spawn(void (*f)(void), Priority pr)
 {
-	int tid = availableID.top();
+	int tid = gAvailableID.top();
 	if (tid < MAX_THREAD_NUM)
 	{
 		Thread *newThread = new Thread(tid, f, pr);
 		gThreads[tid] = newThread;
-		availableID.pop();
+		gAvailableID.pop();
 		gReady.push(newThread);
 		return tid;
 	}
@@ -236,7 +242,7 @@ int uthread_terminate(int tid)
 		}
 		exit(0);
 	}
-	if(!gThreads.count(tid) ) //if true: thread doesn't exist
+	if(gThreads.count(tid) == 0) //if true: thread doesn't exist
 	{
 		std::cerr<< TERMINATE_ERR << std::endl;
 		return FAILURE;
@@ -262,6 +268,7 @@ int uthread_terminate(int tid)
 		gBlocked.erase(tid);
 	}
 	gThreads.erase(tid);
+	gAvailableID.push(tid);
 	delete tmp;
 	return SUCCESS;
 }
@@ -272,6 +279,11 @@ int uthread_suspend(int tid)
 	{
 		std::cerr<< BLOCK_ERR_MAIN <<std::endl;
 		return FAILURE;
+	}
+	if(gThreads.count(tid) == 0)
+	{
+        std::cerr << BLOCK_ERR << " Thread does not exist." << std::endl;
+        return FAILURE;
 	}
 	Thread* tmp = gThreads[tid];
 	if(tmp->getState() == BLOCKED )
@@ -305,7 +317,7 @@ int uthread_suspend(int tid)
 
 int uthread_resume(int tid)
 {
-	if(!gThreads.count(tid) )
+	if(gThreads.count(tid) == 0)
 	{
 		std::cerr << RESUME_ERR << std::endl;
 		return FAILURE;
@@ -334,7 +346,7 @@ int uthread_get_total_quantums()
 
 int uthread_get_quantums(int tid)
 {
-	if(!gThreads.count(tid) )
+	if(gThreads.count(tid) == 0)
 	{
 		std::cerr << GET_QUANTUMS_ERR << std::endl;
 		return FAILURE;

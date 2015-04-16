@@ -4,11 +4,6 @@ LIBHDRS=general.h uthreads.h thread.h priorityList.h
 LIBSRC=uthreads.cpp thread.cpp priorityList.cpp
 LIBOBJ=$(LIBSRC:.cpp=.o)
 
-#remove before submission
-TESTSRC = main.cpp
-TESTOBJ = $(TESTSRC:.cpp=.o)
-TEST = test
-
 INCS=-I.
 CFLAGS = -std=c++11 -Wall -g -O0 $(INCS)
 LOADLIBES = -L./
@@ -25,17 +20,13 @@ all: $(TARGETS)
 
 $(TARGETS):	$(LIBOBJ)
 	$(AR) $(ARFLAGS) $@ $^
-
-#remove before submission
-$(TEST): $(TESTSRC) $(LIB)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(RM) $(LIBOBJ)
 
 %.o: %.cpp
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-#remove TESTOBJ TEST before submission
 clean:
-	$(RM) $(TARGETS) $(OSMLIB) $(OBJ) $(LIBOBJ) $(TESTOBJ) $(TEST) $(TARNAME) *~ *core
+	$(RM) $(TARGETS) $(OSMLIB) $(OBJ) $(LIBOBJ) *~ *core
 
 depend:
 	makedepend -- $(CFLAGS) -- $(SRC) $(LIBSRC)

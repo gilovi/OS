@@ -10,6 +10,7 @@
 #include <queue>
 #include <signal.h>
 #include <sys/time.h>
+#include <stdlib.h> 
 #include <cmath>
 #include <map>
 #include "thread.h"
@@ -205,7 +206,6 @@ int uthread_terminate(int tid)
 					break;
 			case(RUNNING) :
 					gThreads.erase(threadIt);
-//					gRunning = NULL;
 					break;
 			case(BLOCKED) :
 					gBlocked.erase(threadIt->second->getID() );

@@ -1,10 +1,3 @@
-main.d: ../main.cpp ../uthreads.h ../thread.h ../general.h \
- ../priorityList.h
+main.d: ../main.cpp ../uthreads.h
 
 ../uthreads.h:
-
-../thread.h:
-
-../general.h:
-
-../priorityList.h:

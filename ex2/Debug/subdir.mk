@@ -10,11 +10,6 @@ CPP_SRCS += \
 ../thread.cpp \
 ../uthreads.cpp 
 
-O_SRCS += \
-../priorityList.o \
-../thread.o \
-../uthreads.o 
-
 OBJS += \
 ./main.o \
 ./priorityList.o \

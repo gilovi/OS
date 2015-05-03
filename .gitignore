@@ -30,3 +30,5 @@
 # 
 *.cbp
 *.layout
+
+.metadata/

@@ -32,3 +32,5 @@
 *.layout
 
 .metadata/
+*.depend
+

@@ -1,0 +1,30 @@
+00:56:12 **** Incremental Build of configuration Debug for project ex2 ****
+make all 
+Building file: ../main.cpp
+Invoking: Cross G++ Compiler
+g++ -O0 -g3 -Wall -c -std=c++0x -fmessage-length=0 -MMD -MP -MF"main.d" -MT"main.d" -o "main.o" "../main.cpp"
+../main.cpp:18:0: warning: "SECOND" redefined
+ #define SECOND 100000
+ ^
+In file included from ../thread.h:12:0,
+                 from ../main.cpp:15:
+../general.h:19:0: note: this is the location of the previous definition
+ #define SECOND 1000000
+ ^
+../main.cpp: In function ‘void testList()’:
+../main.cpp:261:10: warning: unused variable ‘red4’ [-Wunused-variable]
+  Thread* red4 = new Thread(4, RED);
+          ^
+../main.cpp:262:10: warning: unused variable ‘green5’ [-Wunused-variable]
+  Thread* green5 = new Thread(5, GREEN);
+          ^
+Finished building: ../main.cpp
+ 
+Building target: ex2
+Invoking: Cross G++ Linker
+g++  -o "ex2"  ./main.o ./priorityList.o ./tester.o ./thread.o ./uthreads.o   
+Finished building target: ex2
+ 
+00:56:14 **** Incremental Build of configuration Debug for project ex2 ****
+make all 
+make: Nothing to be done for 'all'.

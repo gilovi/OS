@@ -11,6 +11,8 @@ class Block
         Block(char* data, int length , Block* parent);
          ~Block();
 
+        char* getData();
+        int getDataLength();
         void setHash(char* data);
         char* getHash();
         bool isSuccessor();
@@ -20,17 +22,20 @@ class Block
         void setNum(int);
         bool getToLongest();
         void setToLongest();
-
+        void wasAdded();
+        bool getWasAdded();
     protected:
 
     private:
-        std::string _data;
+        char* _data;
+        int _dataLength;
         char * _hashed_data;
         pthread_mutex_t _contender;
         Block* _parent;
         int _block_num;
         bool _toLongest;
         bool _successor;
+        bool _wasAdded;
 };
 
 #endif // BLOCK_H

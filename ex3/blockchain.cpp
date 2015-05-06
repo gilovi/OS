@@ -13,6 +13,8 @@
 #include <unistd.h>
 #include <map>
 #include "block.h"
+#include "hash.h"
+
 
 Block* gCurrFather;
 
@@ -28,12 +30,12 @@ pthread_mutex_t gblocksNumLock;
 int gblocksNum;
 
 pthread_mutex_t gAvailNumLock;
-std::priority_queue<int, std::vector<int>, std::greater<int> > gAvailNum
+std::priority_queue<int, std::vector<int>, std::greater<int> > gAvailNum;
 
 
 pthread_t _daemon;
 
-void daemonFunc()
+void* daemonFunc(void*)
 {
     while (true)
     {
@@ -53,12 +55,14 @@ void daemonFunc()
             {
                toCompute->setFather(gCurrFather);
             }
-            toCompute->setHash(generate_nonce(toCompute->getNum(), toCompute->getFather()->getNum());
+            int nonce = generate_nonce(toCompute->getNum(), toCompute->getFather()->getNum()) ;
+            toCompute->setHash(generate_hash(toCompute->getData() ,toCompute->getDataLength() ,  nonce)); //toCompute.getData().length() ???
             if(toCompute->isSuccessor())
             {
                 gLongestChainSize++;
                 gCurrFather = toCompute;
             }
+            toCompute->wasAdded();
             pthread_mutex_lock(&gblocksNumLock);
             gblocksNum++;
             pthread_mutex_unlock(&gblocksNumLock);
@@ -85,66 +89,90 @@ int init_blockchain()
 
     pthread_attr_t tattr;
     if(pthread_attr_init(&tattr))
-    {}//TODO: add error handle
+    {return FAILURE;}//TODO: add error handle
     if(pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED))
-    {}//TODO: add error handle
+    {return FAILURE;}//TODO: add error handle
     if(pthread_create(&_daemon, &tattr, daemonFunc, NULL))
-    {}//TODO: add error handle
+    {return FAILURE;}//TODO: add error handle
+    pthread_attr_destroy(&tattr);
+
+    return SUCCESS;
 
 }
 
 int add_block(char *data , int length)
 {
-    newBlock = new Block(*data, length , gFathers.back());
+    Block* newBlock = new Block(data, length , gCurrFather);
 
     pthread_mutex_lock (&gBlocksQueueLock);
     gBlocksQueue.push_back(newBlock);
-    pthread_mutex_unlock (&gBlocksQueueLock)
+    pthread_mutex_unlock (&gBlocksQueueLock);
 
+    int num;
     if (gAvailNum.empty())
     {
+        pthread_mutex_lock (&gBlocksLock); // find the lowst (new) unused place & occupy it
         num = gBlocks.size();
+        gBlocks[num] = newBlock;
+        pthread_mutex_unlock (&gBlocksLock);
     }
     else
     {
-        pthread_mutex_lock (&gAvailNumLock);
-        num = gAvailNum.top;
-        gAvailNum.pop;
-        pthread_mutex_unlock (&gAvailNumLock)
+        pthread_mutex_lock (&gAvailNumLock); //get the freed number safly
+        num = gAvailNum.top();
+        gAvailNum.pop();
+        pthread_mutex_unlock (&gAvailNumLock);
+
+        pthread_mutex_lock (&gBlocksLock);//add the new block to the place safly
+        gBlocks[num] = newBlock;
+        pthread_mutex_unlock (&gBlocksLock);
 
     }
-    pthread_mutex_lock (&gBlocksLock);
-    gBlocks[num] = newBlock;
-    pthread_mutex_unlock (&gBlocksLock);
 
+    newBlock->setNum(num);
     return num;
 
 }
 
 int to_longest(int block_num)
 {
-	return FAILURE;
+    pthread_mutex_lock (&gBlocksLock);
+    gBlocks[block_num]->setToLongest();
+    pthread_mutex_unlock (&gBlocksLock);
+    //TODO: add failure/success cases
+    return FAILURE;
+
 }
 
 
 int attach_now(int block_num)
 {
-	return FAILURE;
+    pthread_mutex_lock (&gBlocksQueueLock);
+    //TODO: find the block with blocknum in blocksQueue get it ,delete it and push it to the top of the list
+    pthread_mutex_unlock (&gBlocksQueueLock);
+	//TODO: add failure/success cases
+    return FAILURE;
+
 }
 
 int was_added(int block_num)
 {
-	return FAILURE;
+	return gBlocks[block_num]->getWasAdded();
 }
 
 int chain_size()
 {
-	return FAILURE;
+    pthread_mutex_lock (&gblocksNumLock);
+    int ret = gblocksNum;
+    pthread_mutex_unlock (&gblocksNumLock);
+    return ret;
 }
 
 int prune_chain()
 {
-	return FAILURE;
+    //TODO: should be a simple loop on the blocks map (just verify that it is not a successor and that it was added..)
+    return FAILURE;
+
 }
 
 void close_chain()

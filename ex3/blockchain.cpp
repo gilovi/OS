@@ -48,8 +48,8 @@ void* daemonFunc(void*)
         else
         {
             pthread_mutex_lock (&gBlocksQueueLock);
-            Block* toCompute = gBlocksQueue.back();
-            gBlocksQueue.pop_back();
+            Block* toCompute = gBlocksQueue.front();
+            gBlocksQueue.pop_front();
             pthread_mutex_unlock (&gBlocksQueueLock);
             if(toCompute->getToLongest())
             {
@@ -148,9 +148,20 @@ int to_longest(int block_num)
 int attach_now(int block_num)
 {
     pthread_mutex_lock (&gBlocksQueueLock);
-    //TODO: find the block with blocknum in blocksQueue get it ,delete it and push it to the top of the list
+    for (std::list<Block*>::iterator it = gBlocksQueue.begin(); it != gBlocksQueue.end(); it++)//TODO: find the block with blocknum in blocksQueue get it ,delete it and push it to the top of the list
+    {
+        if ((*it)->getNum() == block_num)
+        {
+            gBlocksQueue.erase(it);
+            gBlocksQueue.push_front(*it);
+            pthread_mutex_unlock (&gBlocksQueueLock);
+            return 0;
+        }
+
+    }
     pthread_mutex_unlock (&gBlocksQueueLock);
-	//TODO: add failure/success cases
+	//if we got here, so block_num is not in the queue.
+
     return FAILURE;
 
 }

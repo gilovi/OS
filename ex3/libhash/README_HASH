@@ -1,0 +1,25 @@
+#/
+#\  hashlib.a
+#/
+#\  A supplementary hash library for the BlockChain exercise
+#/
+#\
+#/  author: OS 2015 @ HUJI
+#\  email:  huji.os.2015@gmail.com
+#/
+
+## Usage instructions ##
+
+Put libhash.a and hash.h inside your blockchain source folder.
+
+If you're going to test your library (libblockchain.a),
+don't forget to reference the hash library by adding:
+	-L. -lhash -lcrypto
+in addition to -lblockchain and -lpthread.
+
+The library's interface is defined in hash.h.
+
+
+##
+
+Have fun.

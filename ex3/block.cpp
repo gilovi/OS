@@ -11,7 +11,7 @@ Block::Block(char* data, int length , Block* father): //TODO: update to include 
 _data(data),_dataLength(length),_hashed_data(nullptr),_parent(father),_block_num(-1),_toLongest(false),_successor(false),_wasAdded(false)
 {
     _data = new char[length];
-    std::memcpy(data,_data, length); //TODO: confirm this is OK
+    strncpy(data,_data, length); //TODO: confirm this is OK
     pthread_mutex_init(&_contender, NULL);
 
 }

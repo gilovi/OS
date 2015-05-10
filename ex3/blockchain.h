@@ -86,5 +86,9 @@ void close_chain();
 
 int return_on_close();
 
+//TODO: REMOVE!!! FOR TESTING ONLY!!!
+#include "block.h"
+#include <map>
+std::map<int, Block*> getLeaves();
 
 #endif

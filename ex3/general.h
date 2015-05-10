@@ -8,8 +8,9 @@
 #ifndef GENERAL_H_
 #define GENERAL_H_
 
-#define FAILURE -1
-#define SUCCESS	0
+#define NON_EXIST	-2
+#define FAILURE		-1
+#define SUCCESS		0
 
 
 #endif /* GENERAL_H_ */

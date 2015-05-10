@@ -15,6 +15,9 @@
 #include "block.h"
 #include "hash.h"
 
+//TODO: remove
+#include <iostream>
+
 
 Block* gCurrFather;
 
@@ -32,6 +35,8 @@ int gblocksNum;
 pthread_mutex_t gAvailNumLock;
 std::priority_queue<int, std::vector<int>, std::greater<int> > gAvailNum;
 
+std::map<int, Block*> gLeaves;
+
 
 pthread_t _daemon;
 
@@ -48,21 +53,31 @@ void* daemonFunc(void*)
         else
         {
             pthread_mutex_lock (&gBlocksQueueLock);
-            Block* toCompute = gBlocksQueue.back();
-            gBlocksQueue.pop_back();
+            Block* toCompute = gBlocksQueue.front();
+            gBlocksQueue.pop_front();
             pthread_mutex_unlock (&gBlocksQueueLock);
             if(toCompute->getToLongest())
             {
                toCompute->setFather(gCurrFather);
             }
             int nonce = generate_nonce(toCompute->getNum(), toCompute->getFather()->getNum()) ;
-            toCompute->setHash(generate_hash(toCompute->getData() ,toCompute->getDataLength() ,  nonce)); //toCompute.getData().length() ???
+            toCompute->setHash(generate_hash(toCompute->getData() ,toCompute->getDataLength() ,  nonce));
+
             if(toCompute->isSuccessor())
             {
                 gLongestChainSize++;
                 gCurrFather = toCompute;
             }
             toCompute->wasAdded();
+
+//            maintaining leaves list
+            int fatherNum = toCompute->getFather()->getNum();
+            if(gLeaves.count(fatherNum ) )
+            {
+            	gLeaves.erase(fatherNum);
+            }
+            gLeaves[toCompute->getNum() ] = toCompute;
+
             pthread_mutex_lock(&gblocksNumLock);
             gblocksNum++;
             pthread_mutex_unlock(&gblocksNumLock);
@@ -70,6 +85,7 @@ void* daemonFunc(void*)
         }
 
     }
+    pthread_exit(NULL);
 }
 
 int init_blockchain()
@@ -89,11 +105,17 @@ int init_blockchain()
 
     pthread_attr_t tattr;
     if(pthread_attr_init(&tattr))
-    {return FAILURE;}//TODO: add error handle
+    {
+    	return FAILURE;
+    }
     if(pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED))
-    {return FAILURE;}//TODO: add error handle
+    {
+    	return FAILURE;
+    }
     if(pthread_create(&_daemon, &tattr, daemonFunc, NULL))
-    {return FAILURE;}//TODO: add error handle
+    {
+    	return FAILURE;
+    }
     pthread_attr_destroy(&tattr);
 
     return SUCCESS;
@@ -157,7 +179,13 @@ int attach_now(int block_num)
 
 int was_added(int block_num)
 {
-	return gBlocks[block_num]->getWasAdded();
+	if (0 == gBlocks.count(block_num) )
+	{
+		return NON_EXIST;
+	}
+	int ret = gBlocks[block_num]->getWasAdded();
+//	TODO: if error?? than return -1, what error can happen?
+	return ret;
 }
 
 int chain_size()
@@ -183,4 +211,9 @@ void close_chain()
 int return_on_close()
 {
 	return FAILURE;
+}
+
+std::map<int, Block*> getLeaves()
+{
+	return gLeaves;
 }

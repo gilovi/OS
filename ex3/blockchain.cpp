@@ -14,10 +14,11 @@
 #include <map>
 #include "block.h"
 #include "hash.h"
+#include <iostream>
 
 enum closeStatus {OPEN,CLOSING,CLOSED};
 //pthread_mutex_t gStatusLock;
-closeStatus gStatus;
+closeStatus gStatus = CLOSED;
 
 Block* gCurrFather;
 
@@ -52,29 +53,36 @@ void* daemonFunc(void*)
             }
             usleep(5);
         }
-        else
+        else // there are blocks waiting fof hashing
         {
             pthread_mutex_lock (&gBlocksQueueLock);
             Block* toCompute = gBlocksQueue.front();
             gBlocksQueue.pop_front();
             pthread_mutex_unlock (&gBlocksQueueLock);
-            if(toCompute->getToLongest())
+            if (gStatus == OPEN)
             {
-               toCompute->setFather(gCurrFather);
-               toCompute->setFatherNum(gCurrFather->getNum());
+                if(toCompute->getToLongest())
+                {
+                toCompute->setFather(gCurrFather);
+                toCompute->setFatherNum(gCurrFather->getNum());
+                }
+                int nonce = generate_nonce(toCompute->getNum(), toCompute->getFatherNum()) ;
+                toCompute->setHash(generate_hash(toCompute->getData() ,toCompute->getDataLength() , nonce));
+                if(toCompute->isSuccessor())
+                {
+                    gLongestChainSize++;
+                    gCurrFather = toCompute;
+                }
+                toCompute->setWasAdded();
+                pthread_mutex_lock(&gblocksNumLock);
+                gblocksNum++;
+                pthread_mutex_unlock(&gblocksNumLock);
             }
-            int nonce = generate_nonce(toCompute->getNum(), toCompute->getFatherNum()) ;
-            toCompute->setHash(generate_hash(toCompute->getData() ,toCompute->getDataLength() , nonce)); //toCompute.getData().length() ???
-            if(toCompute->isSuccessor())
+            else // we are closing.
             {
-                gLongestChainSize++;
-                gCurrFather = toCompute;
+                int nonce = generate_nonce(toCompute->getNum(), toCompute->getFatherNum()) ;
+                std::cout << generate_hash(toCompute->getData() ,toCompute->getDataLength() , nonce) << std::endl;
             }
-            toCompute->setWasAdded();
-            pthread_mutex_lock(&gblocksNumLock);
-            gblocksNum++;
-            pthread_mutex_unlock(&gblocksNumLock);
-
         }
 
     }
@@ -232,8 +240,14 @@ int chain_size()
 
 int prune_chain()
 {
-    //TODO: should be a simple loop on the blocks map (just verify that it is not a successor and that it was added..)
-    return FAILURE;
+    for (std::map<int,Block*>::iterator it = gBlocks.begin(); it != gBlocks.end(); ++it)
+    {
+        if (!(it->second->isSuccessor()))
+        {
+            delete it->second;
+        }
+    }
+    return SUCCESS;
 
 }
 

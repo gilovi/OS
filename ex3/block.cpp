@@ -2,13 +2,13 @@
 #include <cstring>
 
 Block::Block():
-_data(nullptr),_dataLength(0),_hashed_data(nullptr),_parent(nullptr),_block_num(0),_toLongest(false),_successor(true),_wasAdded(true)
+_data(nullptr),_dataLength(0),_hashed_data(nullptr),_parent(nullptr),_parentNum(-1),_block_num(0),_toLongest(false),_successor(true),_wasAdded(true)
 {
     pthread_mutex_init(&_contender, NULL);
 }
 
 Block::Block(char* data, int length , Block* father): //TODO: update to include all members
-_data(data),_dataLength(length),_hashed_data(nullptr),_parent(father),_block_num(-1),_toLongest(false),_successor(false),_wasAdded(false)
+_data(data),_dataLength(length),_hashed_data(nullptr),_parent(father),_parentNum(father->getNum()),_block_num(-1),_toLongest(false),_successor(false),_wasAdded(false)
 {
     _data = new char[length];
     std::memcpy(data,_data, length); //TODO: confirm this is OK
@@ -19,6 +19,7 @@ _data(data),_dataLength(length),_hashed_data(nullptr),_parent(father),_block_num
 Block::~Block()
 {
     delete _data;
+    pthread_mutex_destroy(&_contender);
     //TODO: dtor
 }
 
@@ -56,6 +57,17 @@ void Block::setFather(Block* newFather)
     _parent = newFather;
 }
 
+int Block::getFatherNum()
+{
+    return _parentNum;
+}
+
+void Block::setFatherNum(int num)
+{
+    _parentNum = num;
+}
+
+
 Block* Block::getFather()
 {
     return _parent;
@@ -77,7 +89,7 @@ void Block::setToLongest()
     _toLongest = true;
 }
 
-void Block::wasAdded()
+void Block::setWasAdded()
 {
     _wasAdded = true;
 }

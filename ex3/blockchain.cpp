@@ -4,7 +4,7 @@
  *  Created on: Apr 29, 2015
  *      Author: moshemandel
  */
-
+#include <errno.h>
 #include <pthread.h>
 #include "general.h"
 #include <list>
@@ -15,6 +15,9 @@
 #include "block.h"
 #include "hash.h"
 
+enum closeStatus {OPEN,CLOSING,CLOSED};
+//pthread_mutex_t gStatusLock;
+closeStatus gStatus;
 
 Block* gCurrFather;
 
@@ -33,7 +36,7 @@ pthread_mutex_t gAvailNumLock;
 std::priority_queue<int, std::vector<int>, std::greater<int> > gAvailNum;
 
 
-pthread_t _daemon;
+pthread_t _daemon , _closingTh;
 
 void* daemonFunc(void*)
 {
@@ -43,6 +46,10 @@ void* daemonFunc(void*)
 
         if (gBlocksQueue.empty())
         {
+            if (gStatus != OPEN)
+            {
+                break;
+            }
             usleep(5);
         }
         else
@@ -54,15 +61,16 @@ void* daemonFunc(void*)
             if(toCompute->getToLongest())
             {
                toCompute->setFather(gCurrFather);
+               toCompute->setFatherNum(gCurrFather->getNum());
             }
-            int nonce = generate_nonce(toCompute->getNum(), toCompute->getFather()->getNum()) ;
-            toCompute->setHash(generate_hash(toCompute->getData() ,toCompute->getDataLength() ,  nonce)); //toCompute.getData().length() ???
+            int nonce = generate_nonce(toCompute->getNum(), toCompute->getFatherNum()) ;
+            toCompute->setHash(generate_hash(toCompute->getData() ,toCompute->getDataLength() , nonce)); //toCompute.getData().length() ???
             if(toCompute->isSuccessor())
             {
                 gLongestChainSize++;
                 gCurrFather = toCompute;
             }
-            toCompute->wasAdded();
+            toCompute->setWasAdded();
             pthread_mutex_lock(&gblocksNumLock);
             gblocksNum++;
             pthread_mutex_unlock(&gblocksNumLock);
@@ -70,11 +78,15 @@ void* daemonFunc(void*)
         }
 
     }
+    return 0;
 }
 
 int init_blockchain()
 {
-
+    if (gStatus == CLOSING)
+    {
+        return FAILURE;
+    }
     gCurrFather = new Block(); // the genesis
     init_hash_generator();
 
@@ -87,21 +99,26 @@ int init_blockchain()
     gBlocks[0] = gCurrFather;
     gLongestChainSize = 1;
 
-    pthread_attr_t tattr;
-    if(pthread_attr_init(&tattr))
+    //pthread_attr_t tattr;
+    //if(pthread_attr_init(&tattr))
+    //{return FAILURE;}//TODO: add error handle
+    //if(pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED))
+    //{return FAILURE;}//TODO: add error handle
+    if(pthread_create(&_daemon, NULL, daemonFunc, NULL)) //creat it joinable so we can know if it was finished on close
     {return FAILURE;}//TODO: add error handle
-    if(pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED))
-    {return FAILURE;}//TODO: add error handle
-    if(pthread_create(&_daemon, &tattr, daemonFunc, NULL))
-    {return FAILURE;}//TODO: add error handle
-    pthread_attr_destroy(&tattr);
+    //pthread_attr_destroy(&tattr);
 
+    gStatus = OPEN;
     return SUCCESS;
 
 }
 
 int add_block(char *data , int length)
 {
+    if (gStatus == CLOSING)
+    {
+        return FAILURE;
+    }
     Block* newBlock = new Block(data, length , gCurrFather);
 
     pthread_mutex_lock (&gBlocksQueueLock);
@@ -136,10 +153,27 @@ int add_block(char *data , int length)
 
 int to_longest(int block_num)
 {
+
     pthread_mutex_lock (&gBlocksLock);
-    gBlocks[block_num]->setToLongest();
-    pthread_mutex_unlock (&gBlocksLock);
-    //TODO: add failure/success cases
+    if (gBlocks.count(block_num) > 0)
+    {
+        Block* block = gBlocks[block_num];
+
+        if (!block->getWasAdded())
+        {//wasnt added. set to longest!
+            block->setToLongest();
+            pthread_mutex_unlock (&gBlocksLock);
+            return 0;
+        }
+        pthread_mutex_unlock (&gBlocksLock);
+        return 1;//was added
+
+    }
+    else //block dosent exist
+    {
+        pthread_mutex_unlock (&gBlocksLock);
+        return -2;
+    }
     return FAILURE;
 
 }
@@ -147,10 +181,14 @@ int to_longest(int block_num)
 
 int attach_now(int block_num)
 {
-    pthread_mutex_lock (&gBlocksQueueLock);
-    for (std::list<Block*>::iterator it = gBlocksQueue.begin(); it != gBlocksQueue.end(); it++)//TODO: find the block with blocknum in blocksQueue get it ,delete it and push it to the top of the list
+    if (gStatus == CLOSING)
     {
-        if ((*it)->getNum() == block_num)
+        return FAILURE;
+    }
+    pthread_mutex_lock (&gBlocksQueueLock);
+    for (std::list<Block*>::iterator it = gBlocksQueue.begin(); it != gBlocksQueue.end(); it++)
+    {
+        if ((*it)->getNum() == block_num) // block found in 'to add' queue (wasnt added yet)
         {
             gBlocksQueue.erase(it);
             gBlocksQueue.push_front(*it);
@@ -158,9 +196,22 @@ int attach_now(int block_num)
             return 0;
         }
 
-    }
+    }//its not in the queue.
     pthread_mutex_unlock (&gBlocksQueueLock);
-	//if we got here, so block_num is not in the queue.
+    pthread_mutex_lock (&gBlocksLock);
+	if (gBlocks.count(block_num) == 0) // check if block exists
+	{
+        pthread_mutex_unlock (&gBlocksLock);
+        return -2; //nope
+
+	}
+	else //it exist
+	{
+        if (gBlocks[block_num]->getWasAdded())
+        pthread_mutex_unlock (&gBlocksLock);
+        return 0;
+	}
+
 
     return FAILURE;
 
@@ -186,12 +237,60 @@ int prune_chain()
 
 }
 
+void* closeFunc(void*)
+{
+std::list<Block*> notAdded;
+
+for (std::map<int,Block*>::iterator it = gBlocks.begin(); it != gBlocks.end(); ++it)
+    {
+        if (it->second->getWasAdded())
+        {
+            delete it->second; //delete add attached blocks
+        }
+        else
+        {
+            notAdded.push_back(it->second);
+        }
+
+    }
+    pthread_join(_daemon, NULL); // wait for _daemon to finish hashing
+    //relese remains
+    for (std::list<Block*>::iterator it = notAdded.begin(); it != notAdded.end(); ++it)
+    {
+        delete *it;
+    }
+    close_hash_generator();
+    pthread_mutex_destroy(&gBlocksQueueLock);
+    pthread_mutex_destroy(&gBlocksLock);
+    pthread_mutex_destroy(&gAvailNumLock);
+    pthread_mutex_destroy(&gblocksNumLock);
+
+    gStatus = CLOSED;
+    return 0;
+}
+
 void close_chain()
 {
-
+    gStatus = CLOSING;
+    if(pthread_create(&_closingTh, NULL, closeFunc, NULL))
+    {
+        exit(1);
+    }
 }
 
 int return_on_close()
 {
-	return FAILURE;
+    int ret = pthread_join(_closingTh, NULL);
+	switch (ret)
+	{
+	case 0:
+	return 1;
+
+	case ESRCH:
+        return -2;
+
+    default:
+        return -1;
+    }
+
 }

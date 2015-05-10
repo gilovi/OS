@@ -18,11 +18,13 @@ class Block
         bool isSuccessor();
         void setFather(Block*);
         Block* getFather();
+        int getFatherNum();
+        void setFatherNum(int);
         int getNum();
         void setNum(int);
         bool getToLongest();
         void setToLongest();
-        void wasAdded();
+        void setWasAdded();
         bool getWasAdded();
     protected:
 
@@ -32,6 +34,7 @@ class Block
         char * _hashed_data;
         pthread_mutex_t _contender;
         Block* _parent;
+        int _parentNum;
         int _block_num;
         bool _toLongest;
         bool _successor;

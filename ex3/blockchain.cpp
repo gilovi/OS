@@ -4,7 +4,7 @@
  *  Created on: Apr 29, 2015
  *      Author: moshemandel
  */
-
+#include <errno.h>
 #include <pthread.h>
 #include "general.h"
 #include <list>
@@ -14,9 +14,12 @@
 #include <map>
 #include "block.h"
 #include "hash.h"
-
-//TODO: remove
 #include <iostream>
+
+
+enum closeStatus {OPEN,CLOSING,CLOSED};
+//pthread_mutex_t gStatusLock;
+closeStatus gStatus = CLOSED;
 
 
 Block* gCurrFather;
@@ -38,7 +41,7 @@ std::priority_queue<int, std::vector<int>, std::greater<int> > gAvailNum;
 std::map<int, Block*> gLeaves;
 
 
-pthread_t _daemon;
+pthread_t _daemon , _closingTh;
 
 void* daemonFunc(void*)
 {
@@ -48,27 +51,43 @@ void* daemonFunc(void*)
 
         if (gBlocksQueue.empty())
         {
+            if (gStatus != OPEN)
+            {
+                break;
+            }
             usleep(5);
         }
-        else
+        else // there are blocks waiting fof hashing
         {
             pthread_mutex_lock (&gBlocksQueueLock);
             Block* toCompute = gBlocksQueue.front();
             gBlocksQueue.pop_front();
             pthread_mutex_unlock (&gBlocksQueueLock);
-            if(toCompute->getToLongest())
+            if (gStatus == OPEN)
             {
-               toCompute->setFather(gCurrFather);
+                if(toCompute->getToLongest())
+                {
+                toCompute->setFather(gCurrFather);
+                toCompute->setFatherNum(gCurrFather->getNum());
+                }
+                int nonce = generate_nonce(toCompute->getNum(), toCompute->getFatherNum()) ;
+                toCompute->setHash(generate_hash(toCompute->getData() ,toCompute->getDataLength() , nonce));
+                if(toCompute->isSuccessor())
+                {
+                    gLongestChainSize++;
+                    gCurrFather = toCompute;
+                }
+                toCompute->setWasAdded();
+                pthread_mutex_lock(&gblocksNumLock);
+                gblocksNum++;
+                pthread_mutex_unlock(&gblocksNumLock);
             }
-            int nonce = generate_nonce(toCompute->getNum(), toCompute->getFather()->getNum()) ;
-            toCompute->setHash(generate_hash(toCompute->getData() ,toCompute->getDataLength() ,  nonce));
 
-            if(toCompute->isSuccessor())
+            else // we are closing.
             {
-                gLongestChainSize++;
-                gCurrFather = toCompute;
+                int nonce = generate_nonce(toCompute->getNum(), toCompute->getFatherNum()) ;
+                std::cout << generate_hash(toCompute->getData() ,toCompute->getDataLength() , nonce) << std::endl;
             }
-            toCompute->wasAdded();
 
 //            maintaining leaves list
             int fatherNum = toCompute->getFather()->getNum();
@@ -81,16 +100,18 @@ void* daemonFunc(void*)
             pthread_mutex_lock(&gblocksNumLock);
             gblocksNum++;
             pthread_mutex_unlock(&gblocksNumLock);
-
         }
 
     }
-    pthread_exit(NULL);
+    return 0;
 }
 
 int init_blockchain()
 {
-
+    if (gStatus == CLOSING)
+    {
+        return FAILURE;
+    }
     gCurrFather = new Block(); // the genesis
     init_hash_generator();
 
@@ -103,27 +124,27 @@ int init_blockchain()
     gBlocks[0] = gCurrFather;
     gLongestChainSize = 1;
 
-    pthread_attr_t tattr;
-    if(pthread_attr_init(&tattr))
-    {
-    	return FAILURE;
-    }
-    if(pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED))
-    {
-    	return FAILURE;
-    }
-    if(pthread_create(&_daemon, &tattr, daemonFunc, NULL))
-    {
-    	return FAILURE;
-    }
-    pthread_attr_destroy(&tattr);
 
+    //pthread_attr_t tattr;
+    //if(pthread_attr_init(&tattr))
+    //{return FAILURE;}//TODO: add error handle
+    //if(pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED))
+    //{return FAILURE;}//TODO: add error handle
+    if(pthread_create(&_daemon, NULL, daemonFunc, NULL)) //creat it joinable so we can know if it was finished on close
+    {return FAILURE;}//TODO: add error handle
+    //pthread_attr_destroy(&tattr);
+
+    gStatus = OPEN;
     return SUCCESS;
 
 }
 
 int add_block(char *data , int length)
 {
+    if (gStatus == CLOSING)
+    {
+        return FAILURE;
+    }
     Block* newBlock = new Block(data, length , gCurrFather);
 
     pthread_mutex_lock (&gBlocksQueueLock);
@@ -158,10 +179,27 @@ int add_block(char *data , int length)
 
 int to_longest(int block_num)
 {
+
     pthread_mutex_lock (&gBlocksLock);
-    gBlocks[block_num]->setToLongest();
-    pthread_mutex_unlock (&gBlocksLock);
-    //TODO: add failure/success cases
+    if (gBlocks.count(block_num) > 0)
+    {
+        Block* block = gBlocks[block_num];
+
+        if (!block->getWasAdded())
+        {//wasnt added. set to longest!
+            block->setToLongest();
+            pthread_mutex_unlock (&gBlocksLock);
+            return 0;
+        }
+        pthread_mutex_unlock (&gBlocksLock);
+        return 1;//was added
+
+    }
+    else //block dosent exist
+    {
+        pthread_mutex_unlock (&gBlocksLock);
+        return -2;
+    }
     return FAILURE;
 
 }
@@ -169,10 +207,38 @@ int to_longest(int block_num)
 
 int attach_now(int block_num)
 {
+    if (gStatus == CLOSING)
+    {
+        return FAILURE;
+    }
     pthread_mutex_lock (&gBlocksQueueLock);
-    //TODO: find the block with blocknum in blocksQueue get it ,delete it and push it to the top of the list
+    for (std::list<Block*>::iterator it = gBlocksQueue.begin(); it != gBlocksQueue.end(); it++)
+    {
+        if ((*it)->getNum() == block_num) // block found in 'to add' queue (wasnt added yet)
+        {
+            gBlocksQueue.erase(it);
+            gBlocksQueue.push_front(*it);
+            pthread_mutex_unlock (&gBlocksQueueLock);
+            return 0;
+        }
+
+    }//its not in the queue.
     pthread_mutex_unlock (&gBlocksQueueLock);
-	//TODO: add failure/success cases
+    pthread_mutex_lock (&gBlocksLock);
+	if (gBlocks.count(block_num) == 0) // check if block exists
+	{
+        pthread_mutex_unlock (&gBlocksLock);
+        return -2; //nope
+
+	}
+	else //it exist
+	{
+        if (gBlocks[block_num]->getWasAdded())
+        pthread_mutex_unlock (&gBlocksLock);
+        return 0;
+	}
+
+
     return FAILURE;
 
 }
@@ -198,19 +264,73 @@ int chain_size()
 
 int prune_chain()
 {
-    //TODO: should be a simple loop on the blocks map (just verify that it is not a successor and that it was added..)
-    return FAILURE;
+    for (std::map<int,Block*>::iterator it = gBlocks.begin(); it != gBlocks.end(); ++it)
+    {
+        if (!(it->second->isSuccessor()))
+        {
+            delete it->second;
+        }
+    }
+    return SUCCESS;
 
+}
+
+void* closeFunc(void*)
+{
+std::list<Block*> notAdded;
+
+for (std::map<int,Block*>::iterator it = gBlocks.begin(); it != gBlocks.end(); ++it)
+    {
+        if (it->second->getWasAdded())
+        {
+            delete it->second; //delete add attached blocks
+        }
+        else
+        {
+            notAdded.push_back(it->second);
+        }
+
+    }
+    pthread_join(_daemon, NULL); // wait for _daemon to finish hashing
+    //relese remains
+    for (std::list<Block*>::iterator it = notAdded.begin(); it != notAdded.end(); ++it)
+    {
+        delete *it;
+    }
+    close_hash_generator();
+    pthread_mutex_destroy(&gBlocksQueueLock);
+    pthread_mutex_destroy(&gBlocksLock);
+    pthread_mutex_destroy(&gAvailNumLock);
+    pthread_mutex_destroy(&gblocksNumLock);
+
+    gStatus = CLOSED;
+    return 0;
 }
 
 void close_chain()
 {
-
+    gStatus = CLOSING;
+    if(pthread_create(&_closingTh, NULL, closeFunc, NULL))
+    {
+        exit(1);
+    }
 }
 
 int return_on_close()
 {
-	return FAILURE;
+    int ret = pthread_join(_closingTh, NULL);
+	switch (ret)
+	{
+	case 0:
+	return 1;
+
+	case ESRCH:
+        return -2;
+
+    default:
+        return -1;
+    }
+
 }
 
 std::map<int, Block*> getLeaves()

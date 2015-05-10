@@ -140,8 +140,8 @@ int main()
 		pthread_attr_init(&attr);
 		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 		createThreads(0,5, threads,&attr,&blocks);
-		usleep(3000000);
-		createThreads(5,num, threads,&attr,&blocks);
+//		usleep(3000000);
+//		createThreads(5,num, threads,&attr,&blocks);
 		pthread_attr_destroy(&attr);
 
 

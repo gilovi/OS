@@ -1,0 +1,11 @@
+1. Problem:	when pruning do not delete parent of genesis - segmentation fault!
+   Solution:	changed isSuccessor in Block.cpp
+2. Problem:	when pruning, double free or corruption?!
+   Solution:	when pruning, erase empty iterator from map.
+3. Problem:	in Roie's test: adds 11 multiple times?
+   Solution:	when pruning, push available number to gAvailNum list.
+4. Problem:	undefined blocks remain in list (shown when printing all chains in roie's test -- phase 2)
+   Solution:	update gLeaves when pruning.
+5. Problem:	daemon thread is in effect busy waiting!
+   Solution:	use conditional variable
+

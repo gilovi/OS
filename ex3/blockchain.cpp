@@ -39,6 +39,7 @@ pthread_mutex_t gAvailNumLock;
 std::priority_queue<int, std::vector<int>, std::greater<int> > gAvailNum;
 
 std::map<int, Block*> gLeaves;
+pthread_mutex_t gLeavesLock;
 
 
 pthread_t _daemon , _closingTh;
@@ -91,15 +92,13 @@ void* daemonFunc(void*)
 
 //            maintaining leaves list
             int fatherNum = toCompute->getFather()->getNum();
+            pthread_mutex_lock(&gLeavesLock);
             if(gLeaves.count(fatherNum ) )
             {
             	gLeaves.erase(fatherNum);
             }
             gLeaves[toCompute->getNum() ] = toCompute;
-
-            pthread_mutex_lock(&gblocksNumLock);
-            gblocksNum++;
-            pthread_mutex_unlock(&gblocksNumLock);
+            pthread_mutex_unlock(&gLeavesLock);
         }
 
     }
@@ -119,7 +118,7 @@ int init_blockchain()
     pthread_mutex_init(&gBlocksLock, NULL);
     pthread_mutex_init(&gAvailNumLock, NULL);
     pthread_mutex_init(&gblocksNumLock, NULL);
-
+    pthread_mutex_init(&gLeavesLock, NULL);
 
     gBlocks[0] = gCurrFather;
     gLongestChainSize = 1;
@@ -266,10 +265,29 @@ int prune_chain()
 {
     for (std::map<int,Block*>::iterator it = gBlocks.begin(); it != gBlocks.end(); ++it)
     {
-        if (!(it->second->isSuccessor()))
-        {
-            delete it->second;
-        }
+    	if(it->second)
+    	{
+//    		std::cout << "block Num: " << it->first << std::endl;
+//    		std::cout << "is successor: " << it->second->isSuccessor() << std::endl;
+    		if (!(it->second->isSuccessor()))
+			{
+
+				pthread_mutex_lock (&gAvailNumLock); //get the freed number safly
+				gAvailNum.push(it->first );
+				pthread_mutex_unlock (&gAvailNumLock);
+
+//				maintaining leaves list
+				pthread_mutex_lock(&gLeavesLock);
+				if(gLeaves.count(it->first ) )
+				{
+					gLeaves.erase(it->first);
+				}
+				pthread_mutex_unlock(&gLeavesLock);
+				delete it->second;
+				gBlocks.erase(it);
+			}
+    	}
+
     }
     return SUCCESS;
 
@@ -284,6 +302,7 @@ for (std::map<int,Block*>::iterator it = gBlocks.begin(); it != gBlocks.end(); +
         if (it->second->getWasAdded())
         {
             delete it->second; //delete add attached blocks
+            gBlocks.erase(it);
         }
         else
         {
@@ -296,6 +315,7 @@ for (std::map<int,Block*>::iterator it = gBlocks.begin(); it != gBlocks.end(); +
     for (std::list<Block*>::iterator it = notAdded.begin(); it != notAdded.end(); ++it)
     {
         delete *it;
+        notAdded.erase(it);
     }
     close_hash_generator();
     pthread_mutex_destroy(&gBlocksQueueLock);

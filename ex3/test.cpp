@@ -51,6 +51,12 @@ int testAddBlock(char* src)
 	return ret;
 }
 
+int testToLongest(int blockNum)
+{
+	int ret = to_longest(blockNum);
+	return ret;
+}
+
 void addMultiple(int num, vector<ThreadData*>* blocks)
 {
 	for (int i=0;i<num;i++)
@@ -93,7 +99,12 @@ void createThreads(int start, int end, pthread_t* threads,pthread_attr_t* attrPt
 			exit(-1);
 		}
 		blocks->push_back(myData);
+		if (i == end-1)
+		{
+			testToLongest(myData->_blockNum);
+		}
 	}
+
 }
 
 
@@ -141,7 +152,7 @@ int main()
 		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 		createThreads(0,5, threads,&attr,&blocks);
 //		usleep(3000000);
-//		createThreads(5,num, threads,&attr,&blocks);
+		createThreads(5,num, threads,&attr,&blocks);
 		pthread_attr_destroy(&attr);
 
 
@@ -177,7 +188,7 @@ int main()
 		}
 		cout<< endl;
 	}
-	pthread_exit(NULL);
+//	pthread_exit(NULL);
 }
 
 

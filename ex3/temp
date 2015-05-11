@@ -1,0 +1,14 @@
+std::map<int, Block*> gLeaves;
+
+//            maintaining leaves list
+            int fatherNum = toCompute->getFather()->getNum();
+            if(gLeaves.count(fatherNum ) )
+            {
+            	gLeaves.erase(fatherNum);
+            }
+            gLeaves[toCompute->getNum() ] = toCompute;
+
+std::map<int, Block*> getLeaves()
+{
+	return gLeaves;
+}

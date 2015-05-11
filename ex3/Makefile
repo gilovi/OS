@@ -7,7 +7,7 @@ LIBLIBS = -lhash -lcrypto -lpthread
 
 INCS=-I.
 CFLAGS = -std=c++11 -Wall -g -O0 $(INCS)
-LOADLIBES = -L./
+LOADLIBES = -L.
 
 LIB = libblockchain.a
 TARGETS = $(LIB)
@@ -19,9 +19,11 @@ TARSRCS=$(LIBSRC) $(LIBHDRS) Makefile README
 
 all: $(TARGETS)
 
-$(TARGETS):	$(LIBOBJ)
+$(TARGETS): hash.h $(LIBOBJ)
 	$(AR) $(ARFLAGS) $@ $^
-	$(RM) $(LIBOBJ)
+	
+test: test.o
+	$(CC) blockchain.o block.o test.o -L. -lhash -lcrypto -lpthread -o test
 
 %.o: %.cpp
 	$(CC) -c -o $@ $< $(CFLAGS)

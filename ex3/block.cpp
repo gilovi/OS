@@ -45,6 +45,11 @@ char* Block::getHash()
 
 bool Block::isSuccessor()
 {
+//	genesis block has no parent!
+	if (_block_num == 0)
+	{
+		return true;
+	}
     if (pthread_mutex_trylock(&(_parent->_contender)) == 0) // first one to get this lock is the successor. anyone else, not.
     {
         _successor = true;

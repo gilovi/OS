@@ -11,7 +11,7 @@ class Block
         Block(char* data, int length , Block* parent);
          ~Block();
 
-        char* getData();
+        const char* getData();
         int getDataLength();
         void setHash(char* data);
         char* getHash();
@@ -26,6 +26,10 @@ class Block
         void setToLongest();
         void setWasAdded();
         bool getWasAdded();
+        int getDepth();
+        bool toPrune();
+        void setToPrune(bool toPrune);
+
     protected:
 
     private:
@@ -39,6 +43,9 @@ class Block
         bool _toLongest;
         bool _successor;
         bool _wasAdded;
+        bool _wasHashed;
+        int _depth;
+        bool _toPrune;
 };
 
 #endif // BLOCK_H

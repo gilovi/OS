@@ -23,13 +23,13 @@ $(TARGETS): hash.h $(LIBOBJ)
 	$(AR) $(ARFLAGS) $@ $^
 	
 test: test.o
-	$(CC) blockchain.o block.o test.o -L. -lhash -lcrypto -lpthread -o test
+	$(CC) test.o -L. -lblockchain -lhash -lcrypto -lpthread -o test
 
 %.o: %.cpp
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 clean:
-	$(RM) $(TARGETS) $(OSMLIB) $(OBJ) $(LIBOBJ) *~ *core
+	$(RM) $(TARGETS) $(OSMLIB) $(OBJ) $(LIBOBJ) test *.o *~ *core
 
 depend:
 	makedepend -- $(CFLAGS) -- $(SRC) $(LIBSRC)

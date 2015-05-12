@@ -41,13 +41,18 @@ int testInit()
 	return init_blockchain();
 }
 
-int testAddBlock(char* src)
+int testAddBlock()
 {
-	int length = sizeof(src);
-	char* test = new char[length];
-	strncpy(test,src,length);
-	int ret =  add_block(test, int(sizeof test));
-	delete test;
+//	int length = sizeof(src);
+
+//	strncpy(test,src,length);
+//	char l[] = "llllll";
+	char str[] = "this is a test";
+	char* pl = str;
+	char* test = new char[strlen(str)];
+	memcpy(test,str,strlen(str));
+	int ret =  add_block(test, strlen(str));
+	delete[] test;
 	return ret;
 }
 
@@ -79,8 +84,8 @@ void* addThreadBlock(void* threadArg)
 	{
 
 	}
-	cout << "           " << myData->_blockNum << " was added " <<endl;
-	cout << "chain size: " << chain_size() << endl;
+//	cout << "           " << myData->_blockNum << " was added " <<endl;
+//	cout << "chain size: " << chain_size() << endl;
 	pthread_exit(NULL);
 }
 
@@ -107,68 +112,8 @@ void createThreads(int start, int end, pthread_t* threads,pthread_attr_t* attrPt
 
 }
 
-
-
-int main()
+void printAllChains(void)
 {
-	vector<ThreadData*> blocks;
-	map<int, int> added;
-	int num = 10;
-	cout<<"***Testing ex3***"<<endl;
-	cout << "testing init, should print " << SUCCESS << " " << testInit() << endl;
-//	int nonce = generate_nonce(1,0);
-//	char* data = "hash";
-//	char* hash = generate_hash(data,sizeof(data),nonce);
-//	cout<<"testing hash: " << hash << endl;
-
-//	adding multiple blocks in sequence
-	{
-	//	addMultiple(5, &blocks);
-	//	int size = 0;
-	//	while (size < chain_size() )
-	//	{
-	//		for(int i = 0; i < blocks.size(); i++)
-	//		{
-	//			if (was_added(blocks[i]->_blockNum) == 0)
-	//			{
-	//
-	//			}
-	//			else if(added[blocks[i]->_blockNum] == 0)
-	//			{
-	//				cout << "           " << blocks[i]->_blockNum << " was added " <<endl;
-	//				added[blocks[i]->_blockNum] = 1;
-	//				cout << "chain size: " << chain_size() << endl;
-	//			}
-	//		}
-	//		size++;
-	//	}
-	}
-
-//	testing threads
-	{
-		pthread_t threads[num];
-		pthread_attr_t attr;
-		pthread_attr_init(&attr);
-		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-		createThreads(0,5, threads,&attr,&blocks);
-//		usleep(3000000);
-		createThreads(5,num, threads,&attr,&blocks);
-		pthread_attr_destroy(&attr);
-
-
-		for(int t=0; t<num; t++)
-		{
-			int rc = pthread_join(threads[t], NULL);
-			if (rc)
-			{
-				cout <<"ERROR; return code from pthread_join() " << rc << endl;
-				exit(-1);
-			}
-		}
-		cout << "chain size: " << chain_size() << endl;
-		cout << "vector size: " << blocks.size() << endl;
-	}
-
 	map<int, Block*> leaves = getLeaves();
 	for (map<int, Block*>::iterator it = leaves.begin();it != leaves.end();++it)
 	{
@@ -188,7 +133,77 @@ int main()
 		}
 		cout<< endl;
 	}
-//	pthread_exit(NULL);
+
+}
+
+int main()
+{
+	vector<ThreadData*> blocks;
+	map<int, int> added;
+	int num = 10;
+	cout<<"***Testing ex3***"<<endl;
+	cout << "testing init, should print " << SUCCESS << " " << testInit() << endl;
+	cout << "adding block " << endl;
+	int ret = testAddBlock();
+	cout << ret <<endl;
+
+//	int nonce = generate_nonce(1,0);
+//	char* data = "hash";
+//	char* hash = generate_hash(data,sizeof(data),nonce);
+//	cout<<"testing hash: " << hash << endl;
+
+//	adding multiple blocks in sequence
+	{
+//		addMultiple(5, &blocks);
+//		int size = 0;
+//		while (size < chain_size() )
+//		{
+//			for(int i = 0; i < blocks.size(); i++)
+//			{
+//				if (was_added(blocks[i]->_blockNum) == 0)
+//				{
+//
+//				}
+//				else if(added[blocks[i]->_blockNum] == 0)
+//				{
+//					cout << "           " << blocks[i]->_blockNum << " was added " <<endl;
+//					added[blocks[i]->_blockNum] = 1;
+//					cout << "chain size: " << chain_size() << endl;
+//				}
+//			}
+//			size++;
+//		}
+	}
+
+////	testing threads
+//	{
+//		pthread_t threads[num];
+//		pthread_attr_t attr;
+//		pthread_attr_init(&attr);
+//		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+//		createThreads(0,5, threads,&attr,&blocks);
+//		usleep(3000000);
+//		createThreads(5,num, threads,&attr,&blocks);
+//		pthread_attr_destroy(&attr);
+//
+//
+//		for(int t=0; t<num; t++)
+//		{
+//			int rc = pthread_join(threads[t], NULL);
+//			if (rc)
+//			{
+//				cout <<"ERROR; return code from pthread_join() " << rc << endl;
+//				exit(-1);
+//			}
+//		}
+//		cout << "chain size: " << chain_size() << endl;
+//		cout << "vector size: " << blocks.size() << endl;
+//	}
+//	printAllChains();
+//	usleep(1000000);
+	close_chain();
+	return_on_close();
+	pthread_exit(NULL);
 }
 
 

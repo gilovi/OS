@@ -15,7 +15,6 @@ class Block
         int getDataLength();
         void setHash(char* data);
         char* getHash();
-        bool isSuccessor();
         void setFather(Block*);
         Block* getFather();
         int getFatherNum();
@@ -26,6 +25,8 @@ class Block
         void setToLongest();
         void setWasAdded();
         bool getWasAdded();
+        void setWasHashed(bool);
+        bool getWasHashed();
         int getDepth();
         bool toPrune();
         void setToPrune(bool toPrune);
@@ -36,12 +37,12 @@ class Block
         char* _data;
         int _dataLength;
         char * _hashed_data;
-        pthread_mutex_t _contender;
+
         Block* _parent;
         int _parentNum;
         int _block_num;
         bool _toLongest;
-        bool _successor;
+
         bool _wasAdded;
         bool _wasHashed;
         int _depth;

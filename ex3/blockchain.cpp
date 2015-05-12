@@ -49,7 +49,7 @@ pthread_mutex_t gDaemonLock;
 pthread_cond_t gDaemon_cv;
 
 
-
+//TODO:change to gDaemon...
 pthread_t _daemon , _closingTh;
 
 Block* getRandomLongestLeaf()
@@ -83,20 +83,18 @@ void* daemonFunc(void*)
 				pthread_exit(NULL);
 			}
     		pthread_cond_wait(&gDaemon_cv,&gBlocksQueueLock);
-//    		std::cout<<"in daemon"<<std::endl;
-//    		std::cout.flush();
+
     	}
 
-//        there are blocks waiting for hashing
-//            pthread_mutex_lock (&gBlocksQueueLock);
+//      there are blocks waiting for hashing
         Block* toCompute = gBlocksQueue.front();
         gBlocksQueue.pop_front();
+        toCompute->setWasAdded();
         pthread_mutex_unlock (&gBlocksQueueLock);
         if (toCompute)
         {
 
 
-            toCompute->setWasAdded();
             if (gStatus == OPEN)
             {
                 if(toCompute->getToLongest())
@@ -107,13 +105,9 @@ void* daemonFunc(void*)
                 }
                 int nonce = generate_nonce(toCompute->getNum(), toCompute->getFatherNum()) ;
                 char* hash = generate_hash(toCompute->getData() ,toCompute->getDataLength() , nonce);
-
                 toCompute->setHash(hash);
-//                if(toCompute->isSuccessor())
-//                {
-//                    gLongestChainSize++;
-//                    gCurrFather = toCompute;
-//                }
+                toCompute->setWasHashed(true);
+
 
 //            	maintaining longestLeaves list
                 pthread_mutex_lock(&gLongestLeavesLock);
@@ -158,7 +152,7 @@ void* daemonFunc(void*)
         }
 
     }
-//    return 0;
+
     pthread_exit(NULL);
 }
 
@@ -168,7 +162,7 @@ int init_blockchain()
     {
         return FAILURE;
     }
-//    gCurrFather = new Block(); // the genesis
+
     Block* genesis = new Block();
     init_hash_generator();
 
@@ -189,14 +183,12 @@ int init_blockchain()
     gLeaves[0] = genesis;
     gLongestLeaves[0] = genesis;
 
-    //pthread_attr_t tattr;
-    //if(pthread_attr_init(&tattr))
-    //{return FAILURE;}//TODO: add error handle
-    //if(pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED))
-    //{return FAILURE;}//TODO: add error handle
+
     if(pthread_create(&_daemon, NULL, daemonFunc, NULL)) //creat it joinable so we can know if it was finished on close
-    {return FAILURE;}//TODO: add error handle
-    //pthread_attr_destroy(&tattr);
+    {
+    	return FAILURE;
+    }
+
 
     gStatus = OPEN;
     return SUCCESS;
@@ -315,7 +307,6 @@ int was_added(int block_num)
 		return NON_EXIST;
 	}
 	int ret = gBlocks[block_num]->getWasAdded();
-//	TODO: if error?? than return -1, what error can happen?
 	return ret;
 }
 
@@ -351,29 +342,12 @@ int prune_chain()
     {
     	if(it->second)
     	{
-//    		std::cout << "block Num: " << it->first << std::endl;
-//    		std::cout << "is successor: " << it->second->isSuccessor() << std::endl;
+
     		if ((it->second->toPrune()) )
 			{
 
 
 
-////				maintaining leaves list
-//				pthread_mutex_lock(&gLeavesLock);
-//				if(gLeaves.count(it->first ) )
-//				{
-//					gLeaves.erase(it->first);
-//				}
-//				pthread_mutex_unlock(&gLeavesLock);
-//
-////				maintaining longest leaves list
-//				pthread_mutex_lock(&gLongestLeavesLock);
-//				if (gLongestLeaves.count(it->first) )
-//				{
-//					gLongestLeaves.erase(it->first);
-//				}
-//				pthread_mutex_unlock(&gLongestLeavesLock);
-//				std::cout<<"deleting block#" << it->first << std::endl;
 				delete it->second;
 				pthread_mutex_lock (&gAvailNumLock); //get the freed number safly
 				gAvailNum.push(it->first );
@@ -396,7 +370,7 @@ int prune_chain()
 
 void* closeFunc(void*)
 {
-//	std::cout<<"+++++++++++++++IN CLOSEFUNC!!!+++++++++++++++"<<std::endl;
+
 	std::list<Block*> notAdded;
 
 	for (std::map<int,Block*>::iterator it = gBlocks.begin(); it != gBlocks.end(); ++it)
@@ -404,19 +378,8 @@ void* closeFunc(void*)
         if (it->second->getWasAdded())
         {
 
-//        	std::cout<<"deleting block#" << it->first << std::endl;
-////        	TODO: add locking mutex
-//        	if (gLongestLeaves.count(it->first) )
-//        	{
-//        		gLongestLeaves.erase(it->first);
-//        	}
-//        	if (gLeaves.erase(it->first) )
-//        	{
-//        		gLeaves.erase(it->first);
-//        	}
 
             delete it->second; //delete add attached blocks
-//            gBlocks.erase(it);
         }
         else
         {
@@ -429,22 +392,14 @@ void* closeFunc(void*)
 	pthread_cond_signal(&gDaemon_cv); //tell deamon to exit if empty
 	pthread_mutex_unlock(&gBlocksQueueLock);
     pthread_join(_daemon, NULL); // wait for _daemon to finish hashing
-    //relese remains
+    //Release remains
     for (std::list<Block*>::iterator it = notAdded.begin(); it != notAdded.end();)
     {
 
-////    	//        	TODO: add locking mutex
-//		if (gLongestLeaves.count((*it)->getNum() ) )
-//		{
-//			gLongestLeaves.erase((*it)->getNum() );
-//		}
-//		if (gLeaves.erase((*it)->getNum() ) )
-//		{
-//			gLeaves.erase((*it)->getNum() );
-//		}
         delete (*it);
         it = notAdded.erase(it);
     }
+//    TODO: add locking mutexes
     notAdded.clear();
     gLongestLeaves.clear();
     gLeaves.clear();
@@ -463,7 +418,6 @@ void* closeFunc(void*)
 	pthread_cond_destroy(&gDaemon_cv);
 
     gStatus = CLOSED;
-//    return 0;
     pthread_exit(NULL);
 }
 

@@ -1,15 +1,16 @@
-20:53:13 **** Incremental Build of configuration Debug for project ex3 ****
+16:54:03 **** Build of configuration Debug for project ex3 ****
 make all 
-Building file: ../main.cpp
+Building file: ../testRoie/test1.cpp
 Invoking: Cross G++ Compiler
-g++ -O0 -g3 -Wall -c -std=c++0x  -fmessage-length=0 -MMD -MP -MF"main.d" -MT"main.d" -o "main.o" "../main.cpp"
-Finished building: ../main.cpp
+g++ -O0 -g3 -Wall -c -std=c++0x  -fmessage-length=0 -MMD -MP -MF"testRoie/test1.d" -MT"testRoie/test1.d" -o "testRoie/test1.o" "../testRoie/test1.cpp"
+Finished building: ../testRoie/test1.cpp
  
-Building target: ex3
-Invoking: Cross G++ Linker
-g++ -L/cs/stud/moshemandel/OS/ex3 -o "ex3"  ./block.o ./blockchain.o ./main.o   -lhash -lcrypto -lpthread
-Finished building target: ex3
- 
-20:53:16 **** Incremental Build of configuration Debug for project ex3 ****
-make all 
-make: Nothing to be done for 'all'.
+Building file: ../block.cpp
+Invoking: Cross G++ Compiler
+g++ -O0 -g3 -Wall -c -std=c++0x  -fmessage-length=0 -MMD -MP -MF"block.d" -MT"block.d" -o "block.o" "../block.cpp"
+../block.cpp: In destructor ‘Block::~Block()’:
+../block.cpp:24:28: error: ‘_contender’ was not declared in this scope
+     pthread_mutex_destroy(&_contender);
+                            ^
+make: *** [block.o] Error 1
+subdir.mk:27: recipe for target 'block.o' failed

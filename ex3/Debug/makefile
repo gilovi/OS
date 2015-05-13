@@ -8,6 +8,9 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include testRoie/subdir.mk
+-include obj/Release/subdir.mk
+-include obj/Debug/subdir.mk
 -include subdir.mk
 -include objects.mk
 

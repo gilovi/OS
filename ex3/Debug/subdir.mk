@@ -6,17 +6,20 @@
 CPP_SRCS += \
 ../block.cpp \
 ../blockchain.cpp \
-../main.cpp 
+../main.cpp \
+../test.cpp 
 
 OBJS += \
 ./block.o \
 ./blockchain.o \
-./main.o 
+./main.o \
+./test.o 
 
 CPP_DEPS += \
 ./block.d \
 ./blockchain.d \
-./main.d 
+./main.d \
+./test.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

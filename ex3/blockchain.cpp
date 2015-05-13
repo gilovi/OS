@@ -6,7 +6,6 @@
  */
 #include <errno.h>
 #include <pthread.h>
-#include "general.h"
 #include <list>
 #include <vector>
 #include <queue>
@@ -17,41 +16,44 @@
 #include <iostream>
 #include <cstdlib>
 
+#define NON_EXIST	-2
+#define FAILURE		-1
+#define SUCCESS		0
 
 enum closeStatus {OPEN,CLOSING,CLOSED};
-//pthread_mutex_t gStatusLock;
 closeStatus gStatus = CLOSED;
 
-
-Block* gCurrFather;
-
+//a list holding blocks that their hash was not yet computed
 pthread_mutex_t gBlocksQueueLock;
 std::list<Block*> gBlocksQueue;
 
+//a map holding all blocks in chain
 pthread_mutex_t gBlocksLock;
 std::map<int,Block*> gBlocks;
 
+//longest chain size
 int gLongestChainSize;
 
+//number of blocks were added since chain was initialized
 pthread_mutex_t gblocksNumLock;
 int gblocksNum;
 
+//priority list holding numbers of blocks that were pruned
 pthread_mutex_t gAvailNumLock;
 std::priority_queue<int, std::vector<int>, std::greater<int> > gAvailNum;
 
-std::map<int, Block*> gLeaves;
-pthread_mutex_t gLeavesLock;
-
+//a map of the leaves of the current longest chains
 std::map<int, Block*> gLongestLeaves;
 pthread_mutex_t gLongestLeavesLock;
 
+//conditional variable for daemon thread
 pthread_mutex_t gDaemonLock;
 pthread_cond_t gDaemon_cv;
 
 
-//TODO:change to gDaemon...
 pthread_t gDaemon , gClosingTh;
 
+//return pointer to a leaf of one of the current longest chains
 Block* getRandomLongestLeaf()
 {
 	pthread_mutex_lock(&gLongestLeavesLock);
@@ -69,6 +71,7 @@ Block* getRandomLongestLeaf()
 	return begin->second;
 }
 
+//a daemon function which computes hash of blocks that were added to chain
 void* daemonFunc(void*)
 {
     while (true)
@@ -105,7 +108,6 @@ void* daemonFunc(void*)
                 }
                 int nonce = generate_nonce(toCompute->getNum(), toCompute->getFatherNum()) ;
                 char* hash = generate_hash(toCompute->getData() ,toCompute->getDataLength() , nonce);
-//                TODO: if pruning throw...
                 toCompute->setHash(hash);
 
 
@@ -141,16 +143,6 @@ void* daemonFunc(void*)
                 std::cout << "hash of block #" << toCompute->getNum() << ": " << toCompute->getHash() << std::endl;
             }
 
-//            maintaining leaves list
-            int fatherNum = toCompute->getFatherNum();
-            pthread_mutex_lock(&gLeavesLock);
-            if(gLeaves.count(fatherNum ) )
-            {
-            	gLeaves.erase(fatherNum);
-            }
-            gLeaves[toCompute->getNum() ] = toCompute;
-            pthread_mutex_unlock(&gLeavesLock);
-
         }
 
     }
@@ -160,7 +152,7 @@ void* daemonFunc(void*)
 
 int init_blockchain()
 {
-    if (gStatus == CLOSING)
+    if (gStatus == CLOSING || gStatus == OPEN)
     {
         return FAILURE;
     }
@@ -172,7 +164,6 @@ int init_blockchain()
     pthread_mutex_init(&gBlocksLock, NULL);
     pthread_mutex_init(&gAvailNumLock, NULL);
     pthread_mutex_init(&gblocksNumLock, NULL);
-    pthread_mutex_init(&gLeavesLock, NULL);
     pthread_mutex_init(&gLongestLeavesLock, NULL);
 
     pthread_mutex_init(&gDaemonLock, NULL);
@@ -181,8 +172,7 @@ int init_blockchain()
     gBlocks[0] = genesis;
     gLongestChainSize = 1;
 
-//    maintaining gLeaves/gLongestLeaves
-    gLeaves[0] = genesis;
+//    maintaining gLongestLeaves
     gLongestLeaves[0] = genesis;
 
 
@@ -239,7 +229,10 @@ int add_block(char *data , int length)
 
 int to_longest(int block_num)
 {
-
+    if (gStatus == CLOSED)
+    {
+        return FAILURE;
+    }
     pthread_mutex_lock (&gBlocksLock);
     if (gBlocks.count(block_num) > 0)
     {
@@ -249,7 +242,7 @@ int to_longest(int block_num)
         {//wasnt added. set to longest!
             block->setToLongest();
             pthread_mutex_unlock (&gBlocksLock);
-            return 0;
+            return SUCCESS;
         }
         pthread_mutex_unlock (&gBlocksLock);
         return 1;//was added
@@ -258,7 +251,7 @@ int to_longest(int block_num)
     else //block dosent exist
     {
         pthread_mutex_unlock (&gBlocksLock);
-        return -2;
+        return NON_EXIST;
     }
     pthread_mutex_unlock (&gBlocksLock);
     return FAILURE;
@@ -280,7 +273,7 @@ int attach_now(int block_num)
             gBlocksQueue.erase(it);
             gBlocksQueue.push_front(*it);
             pthread_mutex_unlock (&gBlocksQueueLock);
-            return 0;
+            return SUCCESS;
         }
 
     }//its not in the queue.
@@ -289,14 +282,14 @@ int attach_now(int block_num)
 	if (gBlocks.count(block_num) == 0) // check if block exists
 	{
         pthread_mutex_unlock (&gBlocksLock);
-        return -2; //nope
+        return NON_EXIST;
 
 	}
 	else //it exist
 	{
         if (gBlocks[block_num]->getWasAdded())
         pthread_mutex_unlock (&gBlocksLock);
-        return 0;
+        return SUCCESS;
 	}
 
 
@@ -306,16 +299,27 @@ int attach_now(int block_num)
 
 int was_added(int block_num)
 {
+    if (gStatus == CLOSED)
+    {
+        return FAILURE;
+    }
+    pthread_mutex_lock(&gBlocksLock);
 	if (0 == gBlocks.count(block_num) )
 	{
 		return NON_EXIST;
 	}
 	int ret = gBlocks[block_num]->getWasHashed();
+	pthread_mutex_unlock(&gBlocksLock);
 	return ret;
 }
 
 int chain_size()
 {
+    if (gStatus == CLOSED)
+    {
+        return FAILURE;
+    }
+
     pthread_mutex_lock (&gblocksNumLock);
     int ret = gblocksNum;
     pthread_mutex_unlock (&gblocksNumLock);
@@ -324,13 +328,12 @@ int chain_size()
 
 int prune_chain()
 {
-
+    if (gStatus != OPEN)
+    {
+        return FAILURE;
+    }
 	Block* tmp = getRandomLongestLeaf();
-//	maintaining gLeaves and gLongestLeaves
-	pthread_mutex_lock(&gLeavesLock);
-	gLeaves.clear();
-	gLeaves[tmp->getNum()] = tmp;
-	pthread_mutex_unlock(&gLeavesLock);
+//	maintaining gLongestLeaves
 	pthread_mutex_lock(&gLongestLeavesLock);
 	gLongestLeaves.clear();
 	gLongestLeaves[tmp->getNum()] = tmp;
@@ -366,8 +369,8 @@ int prune_chain()
 		}
 	}
 	pthread_mutex_unlock(&gBlocksQueueLock);
-//	TODO: shouldn't we block access to gBlocks?
 
+    pthread_mutex_lock(&gBlocksLock);
     for (std::map<int,Block*>::iterator it = gBlocks.begin(); it != gBlocks.end();)
     {
     	if(it->second)
@@ -377,7 +380,7 @@ int prune_chain()
 			{
 
 				delete it->second;
-				pthread_mutex_lock (&gAvailNumLock); //get the freed number safly
+				pthread_mutex_lock (&gAvailNumLock); //get the freed number safely
 				gAvailNum.push(it->first );
 				pthread_mutex_unlock (&gAvailNumLock);
 
@@ -392,13 +395,15 @@ int prune_chain()
     	}
 
     }
+    pthread_mutex_unlock(&gBlocksLock);
+
     return SUCCESS;
 
 }
 
+//a function used by the close chain, that creates a thread that uses this function
 void* closeFunc(void*)
 {
-
 	std::list<Block*> notAdded;
 
 	for (std::map<int,Block*>::iterator it = gBlocks.begin(); it != gBlocks.end(); ++it)
@@ -411,24 +416,25 @@ void* closeFunc(void*)
         {
             notAdded.push_back(it->second);
         }
-
     }
 	gBlocks.clear();
 	pthread_mutex_lock(&gBlocksQueueLock);
 	pthread_cond_signal(&gDaemon_cv); //tell deamon to exit if empty
 	pthread_mutex_unlock(&gBlocksQueueLock);
     pthread_join(gDaemon, NULL); // wait for gDaemon to finish hashing
-    //Release remains
+    //Release remaining blocks
     for (std::list<Block*>::iterator it = notAdded.begin(); it != notAdded.end();)
     {
 
         delete (*it);
         it = notAdded.erase(it);
     }
-//    TODO: add locking mutexes
+
     notAdded.clear();
+    pthread_mutex_lock(&gLongestLeavesLock);
     gLongestLeaves.clear();
-    gLeaves.clear();
+    pthread_mutex_unlock(&gLongestLeavesLock);
+
     pthread_mutex_lock(&gblocksNumLock);
 	gblocksNum = 0;
 	pthread_mutex_unlock(&gblocksNumLock);
@@ -437,7 +443,6 @@ void* closeFunc(void*)
     pthread_mutex_destroy(&gBlocksLock);
     pthread_mutex_destroy(&gAvailNumLock);
     pthread_mutex_destroy(&gblocksNumLock);
-    pthread_mutex_destroy(&gLeavesLock);
 	pthread_mutex_destroy(&gLongestLeavesLock);
 
 	pthread_mutex_destroy(&gDaemonLock);
@@ -459,22 +464,21 @@ void close_chain()
 
 int return_on_close()
 {
+    if (gStatus == CLOSED)
+    {
+        return FAILURE;
+    }
     int ret = pthread_join(gClosingTh, NULL);
 	switch (ret)
 	{
 	case 0:
-	return 1;
+        return 1;
 
 	case ESRCH:
-        return -2;
+        return NON_EXIST;
 
     default:
-        return -1;
+        return FAILURE;
     }
 
-}
-
-std::map<int, Block*> getLeaves()
-{
-	return gLeaves;
 }

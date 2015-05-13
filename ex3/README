@@ -5,7 +5,6 @@ EX: 3
 FILES:
 blockchain.cpp/h	implementation library.
 block.cpp/h		represents a block in chain
-general.h		macros
 Makefile		the makefile for the exercise.
 README			this file.
 
@@ -25,5 +24,7 @@ ANSWERS:
 1. The fact that the library is non-blocking (by using a daemon thread) allows a block
 to have multiple blocks pointing to it. The amount of time that the OS allocates for the 
 deamon thread to run, affects the number of multi-pointer blocks. We cannot change it.
-2. approach for one long chain.
-3. race conditions not dealt with.
+2. Deciding on the father of a block at the time of attachment (like as in toLongest() ),
+will enable one long chain.
+3. A scenario where 2 threads call attach_now 2 different blocks simulataneously, results
+ in undefined behaviour (according to the exercise description).

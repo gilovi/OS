@@ -3,7 +3,10 @@
 
 #include <pthread.h>
 #include <string>
-
+/**
+*   A class that represents a block in the chain
+*   and holds the relevant data needed.
+*/
 class Block
 {
     public:

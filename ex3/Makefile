@@ -21,9 +21,6 @@ all: $(TARGETS)
 
 $(TARGETS): hash.h $(LIBOBJ)
 	$(AR) $(ARFLAGS) $@ $^
-	
-test: test.o
-	$(CC) test.o -L. -lblockchain -lhash -lcrypto -lpthread -o test
 
 %.o: %.cpp
 	$(CC) -c -o $@ $< $(CFLAGS)

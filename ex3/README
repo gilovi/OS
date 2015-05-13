@@ -1,0 +1,29 @@
+moshemandel, gilovi
+Moshe Mandel (301117800), Gilad Ovits (300604493)
+EX: 3
+
+FILES:
+blockchain.cpp/h	implementation library.
+block.cpp/h		represents a block in chain
+general.h		macros
+Makefile		the makefile for the exercise.
+README			this file.
+
+REMARKS:
+We have chosen to implement the library by implementing a single daemon thread,
+that its sole responsibility is to take the next block that is to be attached
+to the chain (if there are any), and calculate its hash (by calling the hash
+function).
+For every data-structure used by the library (maps, lists, vectors), we lock 
+its access by respective mutex variables.
+In order to avoid the daemon function to do "busy waiting", we use
+a conditional variable that is accessed by the "add_block()" function, when 
+a block is added. Therefore, the daemon function is "awake" only when
+the queue of blocks that are to be added (their hash was not calculated) is non-empty.
+
+ANSWERS:
+1. The fact that the library is non-blocking (by using a daemon thread) allows a block
+to have multiple blocks pointing to it. The amount of time that the OS allocates for the 
+deamon thread to run, affects the number of multi-pointer blocks. We cannot change it.
+2. approach for one long chain.
+3. race conditions not dealt with.

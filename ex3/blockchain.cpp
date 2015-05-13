@@ -50,7 +50,7 @@ pthread_cond_t gDaemon_cv;
 
 
 //TODO:change to gDaemon...
-pthread_t _daemon , _closingTh;
+pthread_t gDaemon , gClosingTh;
 
 Block* getRandomLongestLeaf()
 {
@@ -89,7 +89,6 @@ void* daemonFunc(void*)
 //      there are blocks waiting for hashing
         Block* toCompute = gBlocksQueue.front();
         gBlocksQueue.pop_front();
-        toCompute->setWasAdded();
         pthread_mutex_unlock (&gBlocksQueueLock);
         if (toCompute)
         {
@@ -105,8 +104,10 @@ void* daemonFunc(void*)
                 }
                 int nonce = generate_nonce(toCompute->getNum(), toCompute->getFatherNum()) ;
                 char* hash = generate_hash(toCompute->getData() ,toCompute->getDataLength() , nonce);
+//                TODO: if pruning throw...
                 toCompute->setHash(hash);
                 toCompute->setWasHashed(true);
+                toCompute->setWasAdded();
 
 
 //            	maintaining longestLeaves list
@@ -184,7 +185,7 @@ int init_blockchain()
     gLongestLeaves[0] = genesis;
 
 
-    if(pthread_create(&_daemon, NULL, daemonFunc, NULL)) //creat it joinable so we can know if it was finished on close
+    if(pthread_create(&gDaemon, NULL, daemonFunc, NULL)) //creat it joinable so we can know if it was finished on close
     {
     	return FAILURE;
     }
@@ -257,6 +258,7 @@ int to_longest(int block_num)
         pthread_mutex_unlock (&gBlocksLock);
         return -2;
     }
+    pthread_mutex_unlock (&gBlocksLock);
     return FAILURE;
 
 }
@@ -269,7 +271,7 @@ int attach_now(int block_num)
         return FAILURE;
     }
     pthread_mutex_lock (&gBlocksQueueLock);
-    for (std::list<Block*>::iterator it = gBlocksQueue.begin(); it != gBlocksQueue.end(); it++)
+    for (std::list<Block*>::iterator it = gBlocksQueue.begin(); it != gBlocksQueue.end(); ++it)
     {
         if ((*it)->getNum() == block_num) // block found in 'to add' queue (wasnt added yet)
         {
@@ -321,6 +323,7 @@ int chain_size()
 int prune_chain()
 {
 	Block* tmp = getRandomLongestLeaf();
+//	maintaining gLeaves and gLongestLeaves
 	pthread_mutex_lock(&gLeavesLock);
 	gLeaves.clear();
 	gLeaves[tmp->getNum()] = tmp;
@@ -336,6 +339,30 @@ int prune_chain()
 		tmp = tmp->getFather();
 	}
 
+//	iterate over gBlocksQueue
+	pthread_mutex_lock(&gBlocksQueueLock);
+	for(std::list<Block*>::iterator it = gBlocksQueue.begin(); it != gBlocksQueue.end();)
+	{
+		if(!(*it)->getWasHashed() && (*it)->getFather()->toPrune() )
+		{
+			pthread_mutex_lock(&gBlocksLock);
+			gBlocks.erase((*it)->getNum() );
+			pthread_mutex_unlock(&gBlocksLock);
+
+			pthread_mutex_lock (&gAvailNumLock); //get the freed number safly
+			gAvailNum.push((*it)->getNum() );
+			pthread_mutex_unlock (&gAvailNumLock);
+
+			delete (*it);
+			it = gBlocksQueue.erase(it);
+
+		}
+		else
+		{
+			++it;
+		}
+	}
+	pthread_mutex_unlock(&gBlocksQueueLock);
 //	TODO: shouldn't we block access to gBlocks?
 
     for (std::map<int,Block*>::iterator it = gBlocks.begin(); it != gBlocks.end();)
@@ -343,10 +370,8 @@ int prune_chain()
     	if(it->second)
     	{
 
-    		if ((it->second->toPrune()) )
+    		if (it->second->toPrune() && it->second->getWasHashed() )
 			{
-
-
 
 				delete it->second;
 				pthread_mutex_lock (&gAvailNumLock); //get the freed number safly
@@ -391,7 +416,7 @@ void* closeFunc(void*)
 	pthread_mutex_lock(&gBlocksQueueLock);
 	pthread_cond_signal(&gDaemon_cv); //tell deamon to exit if empty
 	pthread_mutex_unlock(&gBlocksQueueLock);
-    pthread_join(_daemon, NULL); // wait for _daemon to finish hashing
+    pthread_join(gDaemon, NULL); // wait for gDaemon to finish hashing
     //Release remains
     for (std::list<Block*>::iterator it = notAdded.begin(); it != notAdded.end();)
     {
@@ -425,7 +450,7 @@ void close_chain()
 {
     gStatus = CLOSING;
 
-    if(pthread_create(&_closingTh, NULL, closeFunc, NULL))
+    if(pthread_create(&gClosingTh, NULL, closeFunc, NULL))
     {
         exit(1);
     }
@@ -433,7 +458,7 @@ void close_chain()
 
 int return_on_close()
 {
-    int ret = pthread_join(_closingTh, NULL);
+    int ret = pthread_join(gClosingTh, NULL);
 	switch (ret)
 	{
 	case 0:

@@ -14,8 +14,8 @@
 
 using namespace std;
 
-#define PHASE_1 50
-#define PHASE_2 59
+#define PHASE_1 10
+#define PHASE_2 19
 
 
 void printAllChains(void)
@@ -57,7 +57,7 @@ int main() {
 
 	cout << "Phase 1:\n" << endl;
 
-	for (int j = 1; j <= 5; j++)
+	for (int j = 1; j <= 1; j++)
 	{
 		cout << "Adding level " << j << ":\n" << endl;
 
@@ -91,7 +91,7 @@ int main() {
 		cout << id << endl;
 		to_longest(id);
 	}
-	while(chain_size() < 59);
+	while(chain_size() < PHASE_2);
 	cout << "Expected chain size: " << PHASE_2 << ". actual: " << chain_size() << endl;
 	
 	cout<< "\n++++++ Print all chains ++++++\n" << endl;

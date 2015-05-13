@@ -21,7 +21,6 @@ Block::~Block()
 
 	delete[] _data;
 	free(_hashed_data);
-    pthread_mutex_destroy(&_contender);
 
 }
 

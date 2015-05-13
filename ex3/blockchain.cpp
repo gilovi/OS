@@ -89,9 +89,9 @@ void* daemonFunc(void*)
 //      there are blocks waiting for hashing
         Block* toCompute = gBlocksQueue.front();
         gBlocksQueue.pop_front();
-        toCompute->setWasAdded();
         pthread_mutex_unlock (&gBlocksQueueLock);
-        if (toCompute)
+        toCompute->setWasAdded();
+
         {
 
 
@@ -106,7 +106,7 @@ void* daemonFunc(void*)
                 int nonce = generate_nonce(toCompute->getNum(), toCompute->getFatherNum()) ;
                 char* hash = generate_hash(toCompute->getData() ,toCompute->getDataLength() , nonce);
                 toCompute->setHash(hash);
-                toCompute->setWasHashed(true);
+
 
 
 //            	maintaining longestLeaves list
@@ -130,6 +130,8 @@ void* daemonFunc(void*)
                 pthread_mutex_lock(&gblocksNumLock);
                 gblocksNum++;
                 pthread_mutex_unlock(&gblocksNumLock);
+
+                toCompute->setWasHashed(true);
             }
 
             else // we are closing.
@@ -153,7 +155,7 @@ void* daemonFunc(void*)
 
     }
 
-    pthread_exit(NULL);
+
 }
 
 int init_blockchain()
@@ -211,6 +213,7 @@ int add_block(char *data , int length)
         num = gBlocks.size();
         gBlocks[num] = newBlock;
         pthread_mutex_unlock (&gBlocksLock);
+
     }
     else
     {
@@ -306,7 +309,7 @@ int was_added(int block_num)
 	{
 		return NON_EXIST;
 	}
-	int ret = gBlocks[block_num]->getWasAdded();
+	int ret = gBlocks[block_num]->getWasHashed();
 	return ret;
 }
 
@@ -320,6 +323,7 @@ int chain_size()
 
 int prune_chain()
 {
+
 	Block* tmp = getRandomLongestLeaf();
 	pthread_mutex_lock(&gLeavesLock);
 	gLeaves.clear();
@@ -375,10 +379,8 @@ void* closeFunc(void*)
 
 	for (std::map<int,Block*>::iterator it = gBlocks.begin(); it != gBlocks.end(); ++it)
     {
-        if (it->second->getWasAdded())
+        if (it->second->getWasHashed())
         {
-
-
             delete it->second; //delete add attached blocks
         }
         else

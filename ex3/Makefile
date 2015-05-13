@@ -1,6 +1,6 @@
 CC=g++
 
-LIBHDRS=general.h blockchain.h block.h hash.h
+LIBHDRS=blockchain.h block.h hash.h
 LIBSRC=blockchain.cpp block.cpp
 LIBOBJ=$(LIBSRC:.cpp=.o)
 LIBLIBS = -lhash -lcrypto -lpthread
@@ -14,7 +14,7 @@ TARGETS = $(LIB)
 
 TAR=tar
 TARFLAGS=-cvf
-TARNAME=ex2.tar
+TARNAME=ex3.tar
 TARSRCS=$(LIBSRC) $(LIBHDRS) Makefile README
 
 all: $(TARGETS)
@@ -26,7 +26,7 @@ $(TARGETS): hash.h $(LIBOBJ)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 clean:
-	$(RM) $(TARGETS) $(OSMLIB) $(OBJ) $(LIBOBJ) test *.o *~ *core
+	$(RM) $(TARGETS) $(OSMLIB) $(OBJ) $(LIBOBJ) *.o *~ *core
 
 depend:
 	makedepend -- $(CFLAGS) -- $(SRC) $(LIBSRC)

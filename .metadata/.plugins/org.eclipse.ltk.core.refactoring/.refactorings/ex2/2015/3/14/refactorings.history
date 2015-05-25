@@ -1,3 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">&#x0A;<refactoring comment="Rename resource &apos;ex2/ready.h&apos; to &apos;priorityList.h&apos;" description="Rename resource &apos;ready.h&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="ready.h" name="priorityList.h" stamp="1427625054442" updateReferences="true"/>&#x0A;<refactoring comment="Rename resource &apos;ex2/ready.cpp&apos; to &apos;priorityList.cpp&apos;" description="Rename resource &apos;ready.cpp&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="ready.cpp" name="priorityList.cpp" stamp="1427625080549" updateReferences="true"/>
-</session>

@@ -8,8 +8,15 @@
 #define FUSE_USE_VERSION 26
 
 #include <fuse.h>
+#include <stdio.h>
+#include <cstdio>
+#include <list>
+#include <iostream>
+#include <stdlib.h>
 
 using namespace std;
+
+#define INPUT_ERR "usage: CachingFileSystem rootdir mountdir numberOfBlocks blockSize\n"
 
 struct fuse_operations caching_oper;
 
@@ -21,6 +28,7 @@ struct fuse_operations caching_oper;
  * mount option is given.
  */
 int caching_getattr(const char *path, struct stat *statbuf){
+	int res = stat(path, statbuf);
 	return 0;
 }
 
@@ -268,6 +276,12 @@ void init_caching_oper()
 
 //basic main. You need to complete it.
 int main(int argc, char* argv[]){
+
+	size_t blockSize = atoi(argv[4]);
+	int numOfBlocks = atoi(argv[5]);
+//	size_t blockSize = stoi(argv[4]);
+//	int numOfBlocks= stoi(argv[5]);
+
 
 	init_caching_oper();
 	argv[1] = argv[2];

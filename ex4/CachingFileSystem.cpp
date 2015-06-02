@@ -8,19 +8,38 @@
 #define FUSE_USE_VERSION 26
 
 #include <fuse.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <fcntl.h>
+#include <cstring>
 #include <stdio.h>
 #include <cstdio>
 #include <list>
 #include <iostream>
 #include <stdlib.h>
+#include <limits.h>
+#include <errno.h>
+#include "cache.h"
 
 using namespace std;
 
+
+struct CacheData
+{
+	char* rootdir;
+	Cache cache;
+};
+
+CacheData* gData;
 #define INPUT_ERR "usage: CachingFileSystem rootdir mountdir numberOfBlocks blockSize\n"
 
 struct fuse_operations caching_oper;
 
-
+static void fullpath(char fpath[PATH_MAX],const char *path)
+{
+	strcpy(fpath,gData->rootdir);
+	strncat(fpath,path,PATH_MAX);
+}
 /** Get file attributes.
  *
  * Similar to stat().  The 'st_dev' and 'st_blksize' fields are
@@ -28,8 +47,11 @@ struct fuse_operations caching_oper;
  * mount option is given.
  */
 int caching_getattr(const char *path, struct stat *statbuf){
-	int res = stat(path, statbuf);
-	return 0;
+	int res = 0;
+	char fpath[PATH_MAX];
+	fullpath(fpath,path);
+	res = stat(fpath, statbuf);
+	return res;
 }
 
 /**
@@ -79,7 +101,18 @@ int caching_access(const char *path, int mask)
  * Changed in version 2.2
  */
 int caching_open(const char *path, struct fuse_file_info *fi){
-	return 0;
+    int retstat = 0;
+    int fd;
+    char fpath[PATH_MAX];
+    fullpath(fpath, path);
+    fd = open(fpath, fi->flags);
+	if (fd < 0)
+//		TODO: fix error
+		retstat = -1;
+
+	fi->fh = fd;
+
+	return retstat;
 }
 
 
@@ -93,7 +126,8 @@ int caching_open(const char *path, struct fuse_file_info *fi){
  */
 int caching_read(const char *path, char *buf, size_t size, off_t offset,
 		struct fuse_file_info *fi){
-	return 0;
+	int retstat = gData->cache.read(path,buf,size,offset,fi->fh);
+	return retstat;
 }
 
 /** Possibly flush cached data
@@ -150,7 +184,19 @@ int caching_release(const char *path, struct fuse_file_info *fi){
  * Introduced in version 2.3
  */
 int caching_opendir(const char *path, struct fuse_file_info *fi){
-	return 0;
+	DIR *dp;
+	int retstat = 0;
+	char fpath[PATH_MAX];
+
+	fullpath(fpath, path);
+	dp = opendir(fpath);
+	if (dp == NULL)
+//	    	TODO: apply error
+	retstat = -1;
+
+	fi->fh = (intptr_t) dp;
+
+	return retstat;
 }
 
 /** Read directory
@@ -168,7 +214,25 @@ int caching_opendir(const char *path, struct fuse_file_info *fi){
  */
 int caching_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset,
 		struct fuse_file_info *fi){
-	return 0;
+	int retstat = 0;
+	DIR *dp;
+	struct dirent *de;
+
+	dp = (DIR *) (uintptr_t) fi->fh;
+	de = readdir(dp);
+	if (de == 0) {
+//		TODO: fix error
+		retstat = -1;
+		return retstat;
+	}
+	do {
+//	log_msg("calling filler with name %s\n", de->d_name);
+	if (filler(buf, de->d_name, NULL, 0) != 0) {
+//		log_msg("    ERROR bb_readdir filler:  buffer full");
+		return -ENOMEM;
+	}
+	} while ((de = readdir(dp)) != NULL);
+	return retstat;
 }
 
 /** Release directory
@@ -195,7 +259,7 @@ int caching_rename(const char *path, const char *newpath){
  * Changed in version 2.6
  */
 void *caching_init(struct fuse_conn_info *conn){
-	return NULL;
+	return gData;
 }
 
 
@@ -277,10 +341,11 @@ void init_caching_oper()
 //basic main. You need to complete it.
 int main(int argc, char* argv[]){
 
-	size_t blockSize = atoi(argv[4]);
-	int numOfBlocks = atoi(argv[5]);
-//	size_t blockSize = stoi(argv[4]);
-//	int numOfBlocks= stoi(argv[5]);
+	gData = new CacheData();
+	gData->rootdir = realpath(argv[1],NULL);
+	size_t blockSize = atoi(argv[3]);
+	int numOfBlocks = atoi(argv[4]);
+	gData->cache = Cache(blockSize, numOfBlocks);
 
 
 	init_caching_oper();
@@ -288,9 +353,11 @@ int main(int argc, char* argv[]){
 	for (int i = 2; i< (argc - 1); i++){
 		argv[i] = NULL;
 	}
+//	TODO: remove -f flag
         argv[2] = (char*) "-s";
-	argc = 3;
+        argv[3] = (char*) "-f";
+	argc = 4;
 
-	int fuse_stat = fuse_main(argc, argv, &caching_oper, NULL);
+	int fuse_stat = fuse_main(argc, argv, &caching_oper, gData);
 	return fuse_stat;
 }

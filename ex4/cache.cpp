@@ -8,7 +8,10 @@
 #include <cmath>
 #include <cstring>
 #include <unistd.h>
+#include <stack>
 #include "cache.h"
+
+
 
 Cache::Cache(size_t blockSize, int numOfBlocks)
 	: _blockSize(blockSize), _numOfBlocks(numOfBlocks)
@@ -37,43 +40,59 @@ int Cache::read(const char *path, char *buf, size_t size, off_t offset,
 {
 // if block in cache: retrieve from cache and increase counter,
 //		otherwise: read relevant path from disk and write to cache.
-	int requiredNumOfBlocks = ceil(double(size)/double(_blockSize));
-	int firstBlockNum = ceil(double(offset)/double(_blockSize));
-	if (0 == firstBlockNum)
-	{
-		firstBlockNum = 1;
-	}
-	int lastBlockNum = firstBlockNum + requiredNumOfBlocks -1;
+	int retstat = 0;
+	int firstBlockNum = floor(double(offset)/double(_blockSize))+1;
+	int lastBlockNum = floor(double(offset+size-1)/double(_blockSize))+1;
 	int currBlockNum = firstBlockNum;
+	off_t totalOffset = 0;
 //	traverse over all blocks
 	while(currBlockNum <= lastBlockNum)
 	{
 		std::string id = getID(path, currBlockNum);
-//		if not in cache: write to cache
-		if (!_blocks.count(id) )
+
+//		if current Block is first block, load only bytes from offset until end of block,
+//		until end of block (load partial block)
+//		Otherwise - start from beginning of block
+//		if current Block is last block, load only bytes remained
+//		otherwise -- load all the whole block (_blockSize)
+		off_t blockOffset = 0;
+		size_t currBlockSize = _blockSize;
+		if (currBlockNum == firstBlockNum)
 		{
-			write(path,currBlockNum,fh);
+			blockOffset = offset - (currBlockNum-1)*_blockSize;
+			if (currBlockNum == lastBlockNum)
+			{
+				currBlockSize = size;
+			}
+			else
+			{
+				currBlockSize = _blockSize - blockOffset;
+			}
+		}
+		else if (currBlockNum == lastBlockNum)
+		{
+			currBlockSize = size - (lastBlockNum-firstBlockNum-1)*_blockSize;
 		}
 
-//		if current Block is last block load only bytes remained
-//		otherwise -- load all block (_blockSize)
-		size_t currBlockSize;
-		if (currBlockNum == lastBlockNum)
+		//		if not in cache: write to cache
+		if (!_blocks.count(id) )
 		{
-			currBlockSize = size - (requiredNumOfBlocks - 1)*_blockSize;
+			retstat += write(path,currBlockNum,fh);
 		}
 		else
 		{
-			currBlockSize = _blockSize;
+			retstat += currBlockSize;
 		}
-		std::memcpy(buf+(currBlockNum-1)*_blockSize,_blocks[id]->_buf, currBlockSize);
+		std::memcpy(buf+totalOffset,_blocks[id]->_buf + blockOffset, currBlockSize);
 		_blocks[id]->_counter++;
+
+		totalOffset += currBlockSize;
 
 		currBlockNum++;
 	}
 
 //	TODO: handle errors and return appropriate value
-	return 0;
+	return retstat;
 }
 
 int Cache::write(const char* path, int blockNum,uint64_t fh)
@@ -111,4 +130,26 @@ std::string Cache::getID(const char* path, int blockNum)
 	ostr << blockNum;
 	std::string id = (std::string)path + "//" + ostr.str();
 	return id;
+}
+
+void Cache::updateQueue(std::string id)
+{
+	std::stack<Block*> stk;
+	while(!_blocksQueue.empty() )
+	{
+		Block* tmp = _blocksQueue.top();
+		stk.push(tmp);
+		_blocksQueue.pop();
+		if(tmp->_id == id)
+		{
+			stk.pop();
+			while(!stk.empty() )
+			{
+				_blocksQueue.push(stk.top() );
+				stk.pop();
+			}
+			break;
+		}
+	}
+
 }

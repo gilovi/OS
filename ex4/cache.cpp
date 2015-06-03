@@ -9,6 +9,7 @@
 #include <cstring>
 #include <unistd.h>
 #include <stack>
+#include <regex>
 #include "cache.h"
 
 
@@ -34,7 +35,7 @@ Cache::~Cache()
 	}
 }
 
-//assume path is already converted relative to rootdir
+//TODO:assume path is already converted relative to rootdir??? NOT NECESSARY!
 int Cache::read(const char *path, char *buf, size_t size, off_t offset,
 		uint64_t fh)
 {
@@ -84,7 +85,17 @@ int Cache::read(const char *path, char *buf, size_t size, off_t offset,
 			retstat += currBlockSize;
 		}
 		std::memcpy(buf+totalOffset,_blocks[id]->_buf + blockOffset, currBlockSize);
-		_blocks[id]->_counter++;
+		if (_blocks.count(id) )
+		{
+			_blocks[id]->_counter++;
+		}
+		else
+		{
+			std::cout<<"ERROR: id not found"<<std::endl;
+		}
+		std::cout<<"Cache::read. id: " << id <<std::endl;
+//		update priority queue:
+//		updateQueue(id);
 
 		totalOffset += currBlockSize;
 
@@ -93,6 +104,30 @@ int Cache::read(const char *path, char *buf, size_t size, off_t offset,
 
 //	TODO: handle errors and return appropriate value
 	return retstat;
+}
+
+//return 1 if file found, 0 otherwise
+int Cache::rename(const char *path, const char *newpath)
+{
+	std::string eStr(path);
+	eStr.append("(//[[:d:]]+)");
+	std::regex e(eStr);
+	std::map<std::string, Block*>::iterator it;
+	for (it = _blocks.begin();it!=_blocks.end();++it)
+	{
+		if(std::regex_match(it->second->_id,e) )
+		{
+			std::string replaceStr(newpath);
+			replaceStr.append("$1");
+			std::string newId = std::regex_replace(it->second->_id,e,replaceStr);
+			it->second->_id = newId;
+			updateQueue(newId);
+//			found such file: return 1
+			return 1;
+		}
+	}
+//	no file found: return 0
+	return 0;
 }
 
 int Cache::write(const char* path, int blockNum,uint64_t fh)
@@ -142,13 +177,14 @@ void Cache::updateQueue(std::string id)
 		_blocksQueue.pop();
 		if(tmp->_id == id)
 		{
+			std::cout<<"tmp->_id == id --- " << id <<std::endl;
 			stk.pop();
 			while(!stk.empty() )
 			{
 				_blocksQueue.push(stk.top() );
 				stk.pop();
 			}
-			break;
+			return;
 		}
 	}
 

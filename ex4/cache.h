@@ -25,6 +25,8 @@ class Cache
 		int read(const char *path, char *buf, size_t size, off_t offset,
 				uint64_t fh);
 
+		int rename(const char *path, const char *newpath);
+
 
 
 	private:

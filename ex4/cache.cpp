@@ -47,6 +47,14 @@ int Cache::read(const char *path, char *buf, size_t size, off_t offset,
 	int currBlockNum = firstBlockNum;
 	off_t totalOffset = 0;
 //	traverse over all blocks
+
+//	TODO: remove. for debugging purposes
+	std::cout<<"size: " << size
+			<< "\noffset: " << offset
+			<< "\nfirstBlockNum: " << firstBlockNum
+			<< "\nlastBlockNum: " << lastBlockNum
+			<< "\nblocksize: " << _blockSize<< std::endl;
+
 	while(currBlockNum <= lastBlockNum)
 	{
 		std::string id = getID(path, currBlockNum);

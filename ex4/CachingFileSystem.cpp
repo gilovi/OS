@@ -6,6 +6,7 @@
  */
 
 #define FUSE_USE_VERSION 26
+#define SUCCESS	0
 
 #include <fuse.h>
 #include <sys/types.h>
@@ -52,20 +53,43 @@ static void fullpath(char fpath[PATH_MAX],const char *path)
  * mount option is given.
  */
 int caching_getattr(const char *path, struct stat *statbuf){
-	int ret = 0;
-	char fpath[PATH_MAX];
-//	TODO: remove
-	std::cout<<"in caching_getattr"<<std::endl;
-	//	TODO: log
+//	int ret = 0;
+//	char fpath[PATH_MAX];
+////	TODO: remove
+//	std::cout<<"in caching_getattr"<<std::endl;
+//	//	TODO: log
+//
+//	fullpath(fpath,path);
+//	ret = stat(fpath, statbuf);
+//	if(0!= ret)
+//	{
+////		TODO: error
+//	}
+////	TODO: log2
+//	return ret;
 
-	fullpath(fpath,path);
-	ret = lstat(fpath, statbuf);
-	if(0!= ret)
+	if(!strcmp(path, "/.filesystem.log"))
 	{
-//		TODO: error
+		return -ENOENT;
 	}
-//	TODO: log2
-	return ret;
+
+	if(strlen(path) > PATH_MAX)
+	{
+		return -ENAMETOOLONG;
+	}
+
+	char fpath[PATH_MAX];
+	fullpath(fpath, path);
+
+	int retstat = stat(fpath, statbuf);
+
+	//in case stat failed
+	if (retstat < SUCCESS)
+	{
+		return -errno;
+	}
+
+	return SUCCESS;
 }
 
 /**

@@ -15,6 +15,9 @@
 #include <vector>
 #include <functional>
 #include <cstdint>
+#include <fstream>
+#include <fuse.h>
+#include <memory>
 
 #include <iostream>
 class Cache

@@ -21,8 +21,16 @@
 #include <errno.h>
 #include "cache.h"
 #include <unistd.h>
+#include <fstream>
 
 using namespace std;
+
+static ofstream logfile;
+
+void log_msg(const string funcName)
+{
+    logfile << time(NULL) << " " << funcName << endl;
+}
 
 
 struct CacheData
@@ -52,6 +60,7 @@ static void fullpath(char fpath[PATH_MAX],const char *path)
  * mount option is given.
  */
 int caching_getattr(const char *path, struct stat *statbuf){
+	log_msg("getattr");
 	int ret = 0;
 	char fpath[PATH_MAX];
 //	TODO: remove
@@ -62,7 +71,7 @@ int caching_getattr(const char *path, struct stat *statbuf){
 	ret = lstat(fpath, statbuf);
 	if(0!= ret)
 	{
-//		TODO: error
+		ret = -errno;
 	}
 //	TODO: log2
 	return ret;
@@ -81,6 +90,7 @@ int caching_getattr(const char *path, struct stat *statbuf){
  * Introduced in version 2.5
  */
 int caching_fgetattr(const char *path, struct stat *statbuf, struct fuse_file_info *fi){
+	log_msg("fgetattr");
 	int ret = 0;
 	char fpath[PATH_MAX];
 //	TODO: remove
@@ -92,7 +102,7 @@ int caching_fgetattr(const char *path, struct stat *statbuf, struct fuse_file_in
 	ret = fstat(fi->fh, statbuf);
 	if (0!=ret)
 	{
-//		TODO: error
+		ret = -errno;
 	}
 //	TODO: log2
 	return ret;
@@ -111,6 +121,7 @@ int caching_fgetattr(const char *path, struct stat *statbuf, struct fuse_file_in
  */
 int caching_access(const char *path, int mask)
 {
+    log_msg("access");
 	int ret = 0;
 	char fpath[PATH_MAX];
 //	TODO: remove
@@ -123,7 +134,7 @@ int caching_access(const char *path, int mask)
 	ret = access(fpath,mask);
 	if (ret < 0)
 	{
-//		TODO: error
+		ret = -errno;
 	}
 
     return ret;
@@ -145,6 +156,7 @@ int caching_access(const char *path, int mask)
  */
 int caching_open(const char *path, struct fuse_file_info *fi){
 //	TODO: remove
+	log_msg("open");
 	std::cout<<"in caching_open"<<std::endl;
     int retstat = 0;
     int fd;
@@ -154,7 +166,7 @@ int caching_open(const char *path, struct fuse_file_info *fi){
 	if (fd < 0)
 	{
 //		TODO: fix error
-		retstat = -1;
+		retstat = -errno;
 	}
 
 	fi->fh = fd;
@@ -173,6 +185,7 @@ int caching_open(const char *path, struct fuse_file_info *fi){
  */
 int caching_read(const char *path, char *buf, size_t size, off_t offset,
 		struct fuse_file_info *fi){
+	log_msg("read");
 //	TODO: remove
 	std::cout<<"in caching_read"<<std::endl;
 
@@ -183,7 +196,7 @@ int caching_read(const char *path, char *buf, size_t size, off_t offset,
 
 	if (ret<0)
 	{
-//		TODO: error
+		ret = -errno;
 	}
 
 	return ret;
@@ -214,6 +227,7 @@ int caching_read(const char *path, char *buf, size_t size, off_t offset,
  */
 int caching_flush(const char *path, struct fuse_file_info *fi)
 {
+	log_msg("flush");
 //	TODO: remove
 	std::cout<<"in caching_flush"<<std::endl;
 	int ret = 0;
@@ -237,6 +251,8 @@ int caching_flush(const char *path, struct fuse_file_info *fi)
  * Changed in version 2.2
  */
 int caching_release(const char *path, struct fuse_file_info *fi){
+    log_msg("release");
+
 //	TODO: remove
 	std::cout<<"in caching_release"<<std::endl;
 
@@ -256,6 +272,8 @@ int caching_release(const char *path, struct fuse_file_info *fi){
  * Introduced in version 2.3
  */
 int caching_opendir(const char *path, struct fuse_file_info *fi){
+    log_msg("opendir");
+
 //	TODO: remove
 	std::cout<<"in caching_opendir"<<std::endl;
 	DIR *dp;
@@ -266,8 +284,7 @@ int caching_opendir(const char *path, struct fuse_file_info *fi){
 	dp = opendir(fpath);
 	if (dp == NULL)
 	{
-//	    	TODO: apply error
-		retstat = -1;
+		retstat = -errno;
 	}
 
 	fi->fh = (intptr_t) dp;
@@ -290,6 +307,8 @@ int caching_opendir(const char *path, struct fuse_file_info *fi){
  */
 int caching_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset,
 		struct fuse_file_info *fi){
+    log_msg("readdir");
+
 //	TODO: remove
 	std::cout<<"in caching_readdir"<<std::endl;
 	int retstat = 0;
@@ -300,7 +319,7 @@ int caching_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t o
 	de = readdir(dp);
 	if (de == 0) {
 //		TODO: fix error
-		retstat = -1;
+		retstat = -errno;
 		return retstat;
 	}
 	do {
@@ -318,6 +337,8 @@ int caching_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t o
  * Introduced in version 2.3
  */
 int caching_releasedir(const char *path, struct fuse_file_info *fi){
+    log_msg("releasedir");
+
 //	TODO: remove
 	std::cout<<"in caching_releasedir"<<std::endl;
 	int ret = 0;
@@ -328,6 +349,8 @@ int caching_releasedir(const char *path, struct fuse_file_info *fi){
 
 /** Rename a file */
 int caching_rename(const char *path, const char *newpath){
+    log_msg("rename");
+
 //	TODO: remove
 	std::cout<<"in caching_rename"<<std::endl;
 	int ret  = 0;
@@ -342,7 +365,7 @@ int caching_rename(const char *path, const char *newpath){
 	ret = rename(fpath, fnewpath);
 	if (ret<0)
 	{
-//		TODO: error
+		return -errno;
 	}
 	return ret;
 }
@@ -358,6 +381,8 @@ int caching_rename(const char *path, const char *newpath){
  * Changed in version 2.6
  */
 void *caching_init(struct fuse_conn_info *conn){
+    log_msg("init");
+
 //	TODO: remove
 	std::cout<<"in caching_init"<<std::endl;
 //	TODO: log
@@ -373,6 +398,9 @@ void *caching_init(struct fuse_conn_info *conn){
  * Introduced in version 2.3
  */
 void caching_destroy(void *userdata){
+    log_msg("destroy");
+    logfile.close();
+
 //	TODO: remove
 	std::cout<<"in caching_destroy"<<std::endl;
 	delete gData;
@@ -395,6 +423,8 @@ void caching_destroy(void *userdata){
  */
 int caching_ioctl (const char *, int cmd, void *arg,
 		struct fuse_file_info *, unsigned int flags, void *data){
+    log_msg("ioctl");
+
 //	TODO: remove
 	std::cout<<"in caching_ioctl"<<std::endl;
 	return 0;
@@ -467,6 +497,9 @@ int main(int argc, char* argv[]){
         argv[2] = (char*) "-s";
         argv[3] = (char*) "-f";
 	argc = 4;
+
+	char* logPath = gData->rootdir + "/.filesystem.log";
+	logfile.open(logPath, ios::app);
 
 	int fuse_stat = fuse_main(argc, argv, &caching_oper, gData);
 	return fuse_stat;

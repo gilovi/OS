@@ -27,6 +27,8 @@ class Cache
 
 		int rename(const char *path, const char *newpath);
 
+//		void setBlockSize(size_t blockSize){ _blockSize = blockSize;};
+//		void setNumOfBlocks(int numOfBlocks){_numOfBlocks = numOfBlocks;};
 
 
 	private:

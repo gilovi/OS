@@ -29,6 +29,10 @@ struct CacheData
 {
 	char* rootdir;
 	Cache cache;
+	~CacheData()
+	{
+		free(rootdir);
+	}
 };
 
 CacheData* gData;
@@ -371,6 +375,7 @@ void *caching_init(struct fuse_conn_info *conn){
 void caching_destroy(void *userdata){
 //	TODO: remove
 	std::cout<<"in caching_destroy"<<std::endl;
+	delete gData;
 //	TODO: log
 }
 
@@ -450,7 +455,8 @@ int main(int argc, char* argv[]){
 	size_t blockSize = atoi(argv[4]);
 
 	gData->cache = Cache(blockSize, numOfBlocks);
-
+//	gData->cache.setBlockSize(blockSize);
+//	gData->cache.setNumOfBlocks(numOfBlocks);
 
 	init_caching_oper();
 	argv[1] = argv[2];

@@ -43,7 +43,8 @@ int Cache::read(const char *path, char *buf, size_t size, off_t offset,
 //		otherwise: read relevant path from disk and write to cache.
 	int retstat = 0;
 	int firstBlockNum = floor(double(offset)/double(_blockSize))+1;
-	int lastBlockNum = floor(double(offset+size-1)/double(_blockSize))+1;
+//	int lastBlockNum = floor(double(offset+size-1)/double(_blockSize))+1;
+	int lastBlockNum = firstBlockNum + ceil(size / (float)_blockSize);
 	int currBlockNum = firstBlockNum;
 	off_t totalOffset = 0;
 //	traverse over all blocks

@@ -428,8 +428,8 @@ int main(int argc, char* argv[]){
 	}
 	// TODO: remove -f flag
 	argv[2] = (char*) "-s";
-	argv[3] = (char*) "-f";
-	argc = 4;
+//	argv[3] = (char*) "-f";
+	argc = 3;
 	char logPath[PATH_MAX];
 	strcpy(logPath,gData->rootdir);
 	strncat(logPath,"/.filesystem.log",PATH_MAX);

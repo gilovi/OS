@@ -46,6 +46,7 @@ class Cache
 				_counter = 0;
 
 				_buf = new char[blockSize];
+				memset(_buf,0,blockSize);
 				std::ostringstream ostr; //output string stream
 				ostr << blockNum;
 				_id = _path + "//"  + ostr.str();

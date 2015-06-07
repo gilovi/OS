@@ -1,0 +1,39 @@
+moshemandel, gilovi
+Moshe Mandel (301117800), Gilad Ovits (300604493)
+EX: 4
+
+FILES:
+
+Makefile		the makefile for the exercise.
+README			this file.
+
+REMARKS:
+
+ANSWERS:
+
+1. No. we still could have much misses to the cache if the cache replacement algorithm dose not fit
+to the running programs nature. on case it fits, it should be faster since the heap in which we store
+our 'cache' will probably be saved in the computer's real cache which is much faster than general disk read.
+
+2. If the user is using small sized memory or very local resources so there will be few deletions from
+the cache the array is better (O(1) for update vs O(log(n)). on the case where the insertions and
+deletions are a frequent task, the list is better (O(log(n) del&insertion vs O(n)))   
+
+3. Better LRU: from time to time block group {A} is called allot of times and in the rest of the
+time there is random access on {blocks}\{A}. the LRU will throw {A} when not in use and LFU will keep it.
+
+ Better LFU: working on a main set of blocks {A} that fits our cache and from time to time using 
+different block from {blocks}\{A} only once. the LFU will throw those occasional blocks, LRU will keep it,
+and may throw a block from {A}.
+
+ Neither: circulating by same order through set {A} that dose not fit to the cache and from time to time 
+new block is added to {A}. the LRU block will always be the next wanted block,
+and LFU block will be the newest block added even if its next in turn.  
+
+4. the LRU algo needs to keep and maintain the correct time stamp for each page. and search
+for it every time. but those operations is very costly. for each memory call the OS would make 
+several calls only to maintain our list or search through it.
+
+5. Probably the most efficient block size would be the actual page size used by the computer.
+if it would be smaller, the computer will bring some unneeded data on each memory call.
+if if it would be larger, each block miss would cause more than one page fault and again might case some unwanted data to come with the rest of the last page. 

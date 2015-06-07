@@ -26,6 +26,10 @@ Cache::Cache(size_t blockSize, int numOfBlocks)
 Cache::~Cache()
 {
 // clear map and queue
+	while(!_blocksQueue.empty() )
+	{
+		_blocksQueue.pop();
+	}
 	std::map<std::string, Block*>::iterator it;
 	for (it = _blocks.begin();it != _blocks.end(); ++it)
 	{
@@ -33,10 +37,7 @@ Cache::~Cache()
 //		_blocks.erase(it);
 	}
 	_blocks.clear();
-	while(!_blocksQueue.empty() )
-	{
-		_blocksQueue.pop();
-	}
+
 }
 
 //TODO:assume path is already converted relative to rootdir??? NOT NECESSARY!
@@ -46,12 +47,11 @@ int Cache::read(const char *path, char *buf, size_t size, off_t offset,
 // if block in cache: retrieve from cache and increase counter,
 //		otherwise: read relevant path from disk and write to cache.
 	int retstat = 0;
-	int firstBlockNum = floor(double(offset)/double(_blockSize))+1;
-	int lastBlockNum = firstBlockNum + floor(double(size-1)/double(_blockSize));
+	int firstBlockNum = floor(double(offset)/double(_blockSize));
+	int lastBlockNum = floor(double(offset+size-1)/double(_blockSize));
 //	int lastBlockNum = firstBlockNum + ceil(size / (double)_blockSize);
 	int currBlockNum = firstBlockNum;
 	off_t totalOffset = 0;
-
 	memset(buf, 0, size);//set zeros on buf
 //	get file size:
 	struct stat st ;
@@ -61,11 +61,11 @@ int Cache::read(const char *path, char *buf, size_t size, off_t offset,
 //	traverse over all blocks
 
 //	TODO: remove. for debugging purposes
-	std::cout<<"size: " << size
-			<< "\noffset: " << offset
-			<< "\nfirstBlockNum: " << firstBlockNum
-			<< "\nlastBlockNum: " << lastBlockNum
-			<< "\nblocksize: " << _blockSize<< std::endl;
+//	std::cout<<"size: " << size
+//			<< "\noffset: " << offset
+//			<< "\nfirstBlockNum: " << firstBlockNum
+//			<< "\nlastBlockNum: " << lastBlockNum
+//			<< "\nblocksize: " << _blockSize<< std::endl;
 
 	if(offset > (off_t)fSize) return -ENXIO;
 
@@ -82,7 +82,7 @@ int Cache::read(const char *path, char *buf, size_t size, off_t offset,
 		size_t currBlockSize = _blockSize;
 		if (currBlockNum == firstBlockNum)
 		{
-			blockOffset = offset - (currBlockNum-1)*_blockSize;
+			blockOffset = offset - currBlockNum*_blockSize;
 			if (currBlockNum == lastBlockNum)
 			{
 				currBlockSize = size;
@@ -92,41 +92,55 @@ int Cache::read(const char *path, char *buf, size_t size, off_t offset,
 				currBlockSize = _blockSize - blockOffset;
 			}
 		}
-//		else if (currBlockNum == lastBlockNum)
-//		{
-//			currBlockSize = size - (lastBlockNum-firstBlockNum-1)*_blockSize;
-//		}
-		else if (totalOffset + currBlockSize > size) {
-			currBlockSize = (size - totalOffset) % _blockSize ? (size - totalOffset) % _blockSize : _blockSize;
+		else if (currBlockNum == lastBlockNum)
+		{
+			if ( (size-totalOffset)%_blockSize == 0)
+			{
+				currBlockSize = _blockSize;
+			}
+			else
+			{
+				currBlockSize = (size - totalOffset)%_blockSize;
+			}
 		}
+//		else if (totalOffset + currBlockSize > size) {
+//			currBlockSize = (size - totalOffset) % _blockSize ? (size - totalOffset) % _blockSize : _blockSize;
+//		}
+
+//		std::cout << "blockNumber: " << currBlockNum
+//				<< "\nblockOffset: "  << blockOffset
+//				<< "\ncurrBlockSize: " << currBlockSize
+//				<< "\ntotalOffset: " << totalOffset <<std::endl;
 
 		//		if not in cache: write to cache
 		if (!_blocks.count(id) )
 		{
-			retstat += write(path,currBlockNum,fh);
+			write(path,currBlockNum,fh);
 		}
-		else
-		{
-			retstat += currBlockSize;
-		}
-		std::cout<<"before memcpy.\nblockOffset:" << blockOffset
-					<< "\ncurrBlockSize:" << currBlockSize
-					<< std::endl;
-		std::memcpy(buf+totalOffset,_blocks[id]->_buf + blockOffset, currBlockSize);
+
+		retstat += currBlockSize;
 		if (_blocks.count(id) )
 		{
 			_blocks[id]->_counter++;
 		}
 		else
 		{
+//			TODO: remove?
 			std::cout<<"ERROR: id not found"<<std::endl;
 		}
-		std::cout<<"Cache::read. id: " << id <<std::endl;
+//		TODO: remove
+//		std::cout<<"Cache::read. id: " << id <<std::endl;
 //		update priority queue:
-//		updateQueue(id);
+		updateQueue(id);
+//		std::cout<<"=========="<<std::endl;
+//		std::cout<<"before memcpy.\nblockOffset: " << blockOffset
+//					<< "\ncurrBlockSize: " << currBlockSize
+//					<< "\ntotalOffset: " << totalOffset
+//					<< std::endl;
+		std::memcpy(buf+totalOffset,_blocks[id]->_buf + blockOffset, currBlockSize);
+//		std::cout<<"after memcpy"<<std::endl;
 
 		totalOffset += currBlockSize;
-
 		currBlockNum++;
 	}
 
@@ -160,6 +174,8 @@ int Cache::rename(const char *path, const char *newpath)
 
 int Cache::write(const char* path, int blockNum,uint64_t fh)
 {
+//	std::cout << "in Cache::write" <<std::endl;
+//	std::cout << "blockNum: " << blockNum << std::endl;
 	int retstat = 0;
 	if (isFull() )
 	{
@@ -174,7 +190,11 @@ int Cache::write(const char* path, int blockNum,uint64_t fh)
 	_blocks[newBlock->_id] = newBlock;
 	_blocksQueue.push(newBlock);
 //		TODO: should a case of EOF require allocating only the needed space and not the full block size?
-	retstat = pread(fh, _blocks[newBlock->_id]->_buf, _blockSize, (blockNum-1)*_blockSize);
+//	std::cout << "test-----" <<std::endl;
+//	std::cout << "newBlock id: " << newBlock->_id << std::endl;
+//	std::cout << "pread" << std::endl;
+	retstat = pread(fh, _blocks[newBlock->_id]->_buf, _blockSize, blockNum*_blockSize);
+//	std::cout<<"done pread"<<std::endl;
 
 
 
@@ -214,8 +234,6 @@ void Cache::updateQueue(std::string id)
 		_blocksQueue.pop();
 		if(tmp->_id == id)
 		{
-			std::cout<<"tmp->_id == id --- " << id <<std::endl;
-			stk.pop();
 			while(!stk.empty() )
 			{
 				_blocksQueue.push(stk.top() );

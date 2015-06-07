@@ -181,6 +181,16 @@ int Cache::write(const char* path, int blockNum,uint64_t fh)
 	return retstat;
 }
 
+void Cache::PrintToLog(std::ofstream& log)
+{
+	std::map<std::string, Block*>::iterator it;
+	for (it = _blocks.begin();it != _blocks.end(); ++it)
+	{
+		Block* block = it->second;
+		log << block->_path.substr(1) << " " << block->_blockNum+1 << " " << block->_counter <<std::endl;
+	}
+}
+
 bool Cache::isFull()
 {
 	return (int)_blocks.size() == _numOfBlocks;

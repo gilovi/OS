@@ -25,15 +25,15 @@
 #include <fstream>
 
 using namespace std;
-#define LOG_CALL_CHECK(path) if(!strcmp(path, "/.filesystem.log")) {return -ENOENT}
+#define LOG_CALL_CHECK(path) if(!strcmp(path, "/.filesystem.log")) return -ENOENT
 
 
 
-static ofstream logfile;
+static ofstream logFile;
 
 void log_msg(const string funcName)
 {
-    logfile << time(NULL) << " " << funcName << endl;
+    logFile << time(NULL) << " " << funcName << endl;
 }
 
 
@@ -67,7 +67,6 @@ int caching_getattr(const char *path, struct stat *statbuf){
 
 	log_msg("getattr");
 	LOG_CALL_CHECK(path);
-	int ret = 0;
 
 //	int ret = 0;
 //	char fpath[PATH_MAX];
@@ -430,7 +429,7 @@ void *caching_init(struct fuse_conn_info *conn){
  */
 void caching_destroy(void *userdata){
     log_msg("destroy");
-    logfile.close();
+    logFile.close();
 
 //	TODO: remove
 	std::cout<<"in caching_destroy"<<std::endl;
@@ -455,7 +454,7 @@ void caching_destroy(void *userdata){
 int caching_ioctl (const char *, int cmd, void *arg,
 		struct fuse_file_info *, unsigned int flags, void *data){
     log_msg("ioctl");
-
+	gData->cache.PrintToLog(logFile);
 //	TODO: remove
 	std::cout<<"in caching_ioctl"<<std::endl;
 	return 0;
@@ -529,8 +528,8 @@ int main(int argc, char* argv[]){
         argv[3] = (char*) "-f";
 	argc = 4;
 	
-	char* logPath = gData->rootdir + "/.filesystem.log";
-	logfile.open(logPath, ios::app);
+	const char* logPath = *(gData->rootdir) + "/.filesystem.log";
+	logFile.open(logPath, ios::app);
 
 	int fuse_stat = fuse_main(argc, argv, &caching_oper, gData);
 	return fuse_stat;

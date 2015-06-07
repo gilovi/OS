@@ -20,6 +20,11 @@
 #include "cache.h"
 #include <unistd.h>
 #include <fstream>
+
+#define ISDIR(path) (stat(path, &sb) == 0 && S_ISDIR(sb.st_mode))
+#define INPUT_ERR "usage: CachingFileSystem rootdir mountdir numberOfBlocks blockSize\n"
+#define MAIN_ERR "System Error"
+
 using namespace std;
 static ofstream logfile;
 void log_msg(const string funcName)
@@ -36,7 +41,7 @@ struct CacheData
 	}
 };
 CacheData* gData;
-#define INPUT_ERR "usage: CachingFileSystem rootdir mountdir numberOfBlocks blockSize\n"
+
 struct fuse_operations caching_oper;
 static void fullpath(char fpath[PATH_MAX],const char *path)
 {
@@ -414,26 +419,46 @@ void init_caching_oper()
 }
 //basic main. You need to complete it.
 int main(int argc, char* argv[]){
-	gData = new CacheData();
-	gData->rootdir = realpath(argv[1],NULL);
+
+	if (argc!=5)
+	{
+		cout << INPUT_ERR << endl;
+	}
+	char tmpRoot[PATH_MAX], tmpMount[PATH_MAX];
+    if(realpath(argv[1], tmpRoot) == NULL)
+	{
+		return -errno;
+	}
+    if(realpath(argv[2], tmpMount) == NULL)
+    {
+    	return -errno;
+    }
 	int numOfBlocks = atoi(argv[3]);
 	size_t blockSize = atoi(argv[4]);
+
+    struct stat sb;
+    if (ISDIR(tmpRoot) == 0 || ISDIR(tmpMount) == 0 ||numOfBlocks <=0 || blockSize <= 0)
+    {
+    	cout << INPUT_ERR << endl;
+    }
+
+	gData = new CacheData();
+	gData->rootdir = tmpRoot;
 	gData->cache = Cache(blockSize, numOfBlocks);
-	// gData->cache.setBlockSize(blockSize);
-	// gData->cache.setNumOfBlocks(numOfBlocks);
+
 	init_caching_oper();
 	argv[1] = argv[2];
 	for (int i = 2; i< (argc - 1); i++){
 		argv[i] = NULL;
 	}
-	// TODO: remove -f flag
+
 	argv[2] = (char*) "-s";
-//	argv[3] = (char*) "-f";
+
 	argc = 3;
 	char logPath[PATH_MAX];
 	strcpy(logPath,gData->rootdir);
 	strncat(logPath,"/.filesystem.log",PATH_MAX);
-//	char* logPath = gData->rootdir + "/.filesystem.log";
+
 	logfile.open(logPath, ios::app);
 	int fuse_stat = fuse_main(argc, argv, &caching_oper, gData);
 	return fuse_stat;

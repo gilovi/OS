@@ -88,17 +88,6 @@ class Cache
 		std::map<std::string, Block*> _blocks;
 		std::priority_queue<Block*,std::vector<Block*>, CmpCounters> _blocksQueue;
 
-//		TODO: remove. for debugging purposes
-		void printMap()
-		{
-			std::cout<<"print map"<<std::endl;
-			std::map<std::string, Block*>::iterator it;
-			for (it = _blocks.begin();it != _blocks.end(); ++it)
-			{
-				std::cout<<it->first <<std::endl;
-			}
-			std::cout<<"\n+++++\n";
-		}
 };
 
 

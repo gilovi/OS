@@ -6,6 +6,7 @@
  */
 
 #define FUSE_USE_VERSION 26
+#define SUCCESS	0
 
 #include <fuse.h>
 #include <sys/types.h>
@@ -24,6 +25,9 @@
 #include <fstream>
 
 using namespace std;
+#define LOG_CALL_CHECK(path) if(!strcmp(path, "/.filesystem.log")) {return -ENOENT}
+
+
 
 static ofstream logfile;
 
@@ -60,21 +64,46 @@ static void fullpath(char fpath[PATH_MAX],const char *path)
  * mount option is given.
  */
 int caching_getattr(const char *path, struct stat *statbuf){
-	log_msg("getattr");
-	int ret = 0;
-	char fpath[PATH_MAX];
-//	TODO: remove
-	std::cout<<"in caching_getattr"<<std::endl;
-	//	TODO: log
 
-	fullpath(fpath,path);
-	ret = lstat(fpath, statbuf);
-	if(0!= ret)
+	log_msg("getattr");
+	LOG_CALL_CHECK(path);
+	int ret = 0;
+
+//	int ret = 0;
+//	char fpath[PATH_MAX];
+////	TODO: remove
+//	std::cout<<"in caching_getattr"<<std::endl;
+//	//	TODO: log
+//
+//	fullpath(fpath,path);
+//	ret = stat(fpath, statbuf);
+//	if(0!= ret)
+//	{
+////		TODO: error
+//	}
+////	TODO: log2
+//	return ret;
+
+	if(strlen(path) > PATH_MAX)
 	{
-		ret = -errno;
+		return -ENAMETOOLONG;
 	}
-//	TODO: log2
-	return ret;
+
+
+	char fpath[PATH_MAX];
+	fullpath(fpath, path);
+
+	int retstat = stat(fpath, statbuf);
+
+	//in case stat failed
+	if (retstat < SUCCESS)
+	{
+
+		return -errno;
+
+	}
+
+	return SUCCESS;
 }
 
 /**
@@ -122,6 +151,7 @@ int caching_fgetattr(const char *path, struct stat *statbuf, struct fuse_file_in
 int caching_access(const char *path, int mask)
 {
     log_msg("access");
+    LOG_CALL_CHECK(path);
 	int ret = 0;
 	char fpath[PATH_MAX];
 //	TODO: remove
@@ -130,7 +160,6 @@ int caching_access(const char *path, int mask)
 //	TODO: log
 
 	fullpath(fpath, path);
-
 	ret = access(fpath,mask);
 	if (ret < 0)
 	{
@@ -157,8 +186,10 @@ int caching_access(const char *path, int mask)
 int caching_open(const char *path, struct fuse_file_info *fi){
 //	TODO: remove
 	log_msg("open");
+	LOG_CALL_CHECK(path);
 	std::cout<<"in caching_open"<<std::endl;
     int retstat = 0;
+    
     int fd;
     char fpath[PATH_MAX];
     fullpath(fpath, path);
@@ -273,7 +304,7 @@ int caching_release(const char *path, struct fuse_file_info *fi){
  */
 int caching_opendir(const char *path, struct fuse_file_info *fi){
     log_msg("opendir");
-
+	LOG_CALL_CHECK(path);
 //	TODO: remove
 	std::cout<<"in caching_opendir"<<std::endl;
 	DIR *dp;
@@ -350,7 +381,7 @@ int caching_releasedir(const char *path, struct fuse_file_info *fi){
 /** Rename a file */
 int caching_rename(const char *path, const char *newpath){
     log_msg("rename");
-
+	LOG_CALL_CHECK(path);
 //	TODO: remove
 	std::cout<<"in caching_rename"<<std::endl;
 	int ret  = 0;
@@ -497,7 +528,7 @@ int main(int argc, char* argv[]){
         argv[2] = (char*) "-s";
         argv[3] = (char*) "-f";
 	argc = 4;
-
+	
 	char* logPath = gData->rootdir + "/.filesystem.log";
 	logfile.open(logPath, ios::app);
 

@@ -10,6 +10,9 @@
 #include <unistd.h>
 #include <stack>
 #include <regex>
+#include <fcntl.h>
+#include <limits.h>
+#include <errno.h>
 #include "cache.h"
 
 
@@ -27,8 +30,9 @@ Cache::~Cache()
 	for (it = _blocks.begin();it != _blocks.end(); ++it)
 	{
 		delete it->second;
-		_blocks.erase(it);
+//		_blocks.erase(it);
 	}
+	_blocks.clear();
 	while(!_blocksQueue.empty() )
 	{
 		_blocksQueue.pop();
@@ -43,10 +47,17 @@ int Cache::read(const char *path, char *buf, size_t size, off_t offset,
 //		otherwise: read relevant path from disk and write to cache.
 	int retstat = 0;
 	int firstBlockNum = floor(double(offset)/double(_blockSize))+1;
-//	int lastBlockNum = floor(double(offset+size-1)/double(_blockSize))+1;
-	int lastBlockNum = firstBlockNum + ceil(size / (float)_blockSize);
+	int lastBlockNum = firstBlockNum + floor(double(size-1)/double(_blockSize));
+//	int lastBlockNum = firstBlockNum + ceil(size / (double)_blockSize);
 	int currBlockNum = firstBlockNum;
 	off_t totalOffset = 0;
+
+	memset(buf, 0, size);//set zeros on buf
+//	get file size:
+	struct stat st ;
+	fstat(fh, &st);
+	size_t fSize = st.st_size;
+
 //	traverse over all blocks
 
 //	TODO: remove. for debugging purposes
@@ -55,6 +66,8 @@ int Cache::read(const char *path, char *buf, size_t size, off_t offset,
 			<< "\nfirstBlockNum: " << firstBlockNum
 			<< "\nlastBlockNum: " << lastBlockNum
 			<< "\nblocksize: " << _blockSize<< std::endl;
+
+	if(offset > (off_t)fSize) return -ENXIO;
 
 	while(currBlockNum <= lastBlockNum)
 	{
@@ -79,9 +92,12 @@ int Cache::read(const char *path, char *buf, size_t size, off_t offset,
 				currBlockSize = _blockSize - blockOffset;
 			}
 		}
-		else if (currBlockNum == lastBlockNum)
-		{
-			currBlockSize = size - (lastBlockNum-firstBlockNum-1)*_blockSize;
+//		else if (currBlockNum == lastBlockNum)
+//		{
+//			currBlockSize = size - (lastBlockNum-firstBlockNum-1)*_blockSize;
+//		}
+		else if (totalOffset + currBlockSize > size) {
+			currBlockSize = (size - totalOffset) % _blockSize ? (size - totalOffset) % _blockSize : _blockSize;
 		}
 
 		//		if not in cache: write to cache
@@ -93,6 +109,9 @@ int Cache::read(const char *path, char *buf, size_t size, off_t offset,
 		{
 			retstat += currBlockSize;
 		}
+		std::cout<<"before memcpy.\nblockOffset:" << blockOffset
+					<< "\ncurrBlockSize:" << currBlockSize
+					<< std::endl;
 		std::memcpy(buf+totalOffset,_blocks[id]->_buf + blockOffset, currBlockSize);
 		if (_blocks.count(id) )
 		{
@@ -150,7 +169,6 @@ int Cache::write(const char* path, int blockNum,uint64_t fh)
 		delete _blocks[id];
 		_blocks.erase(id);
 	}
-
 
 	Block* newBlock = new Block(path,blockNum,_blockSize);
 	_blocks[newBlock->_id] = newBlock;

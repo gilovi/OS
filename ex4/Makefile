@@ -12,23 +12,10 @@ LOADLIBES = -L.
 TAR=tar
 TARFLAGS=-cvf
 TARNAME=ex4.tar
-TARSRCS=$(LIBSRC) $(LIBHDRS) Makefile README
+TARSRCS= $(HDRS) $(SRCS) Makefile README 
 
-all: $(TARGETS)
-
-$(TARGETS): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^
-
-caching: cache.o CachingFileSystem.cpp
-	g++ -Wall -std=c++11 cache.o CachingFileSystem.cpp `pkg-config fuse --cflags --libs` -o caching
-
-run: caching
-	caching $(ARGS)
-
-copy:
-	mkdir /tmp/mount
-	mkdir /tmp/root
-	cp /cs/stud/moshemandel/OS/ex4/root/* /tmp/root
+CachingFileSystem: cache.o 
+	g++ -Wall -std=c++11 cache.o CachingFileSystem.cpp `pkg-config fuse --cflags --libs` -o CachingFileSystem
 
 unmount:
 	fusermount -u /tmp/mount
@@ -37,7 +24,7 @@ unmount:
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 clean:
-	$(RM) $(TARGETS) $(OSMLIB) $(OBJ) $(LIBOBJ) caching *.o *~ *core
+	$(RM) $(OBJS) $(LIBOBJ) CachingFileSystem *.o *~ *core
 
 depend:
 	makedepend -- $(CFLAGS) -- $(SRC) $(LIBSRC)

@@ -18,6 +18,7 @@
 #include <fstream>
 #include <fuse.h>
 #include <memory>
+#include <fstream>
 
 #include <iostream>
 class Cache
@@ -29,9 +30,7 @@ class Cache
 				uint64_t fh);
 
 		int rename(const char *path, const char *newpath);
-
-//		void setBlockSize(size_t blockSize){ _blockSize = blockSize;};
-//		void setNumOfBlocks(int numOfBlocks){_numOfBlocks = numOfBlocks;};
+		void PrintToLog(std::ofstream& log);
 
 
 	private:

@@ -19,7 +19,7 @@ int portNum, maxFileSize;
 char buffer[];
 };
 */
-
+#define BUFF_SIZE 1024
 static int connectionFd;
 
 void*  fetchData(void*);

@@ -77,20 +77,36 @@ int main( int argc, char* argv[] )
   }
 void rcvBuff(char* buffer , int bufferSize)
 {
+	int bytesGot = 0;
+	int got = 1;
 
+		while (bytesGot<bufferSize){
+			 got = read(connectionFd, buffer + bytesGot, bufferSize - bytesGot);
+			if (got < 0 )
+			{
+			//TODO:error ha
+			}
+			bytesGot += got;
+		}
 }
 
  void rcvFile(ofstream* writeTo, int sizeOfFile)
  {
+	 char buff[BUFF_SIZE] =
+	 int i = sizeOfFile/BUFF_SIZE;
+	 int reminder =  sizeOfFile % BUFF_SIZE;
+
+	 for(i; i>0; i--)
+	 {
+		 rcvBuff()
+
+	 }
 
  }
 
 
 void* fetchData(void* p)
 {
-	//fetch file size & verify it's valid
-	char S[sizeof(int)];
-	rcvBuff(S,sizeof(int));
 
 }
 

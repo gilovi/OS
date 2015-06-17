@@ -6,6 +6,8 @@
  */
 
 #include "srftp.h"
+#include "general.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,9 +21,15 @@
 
 using namespace std;
 
-void error(int err)
+static int maxFileSize ;
+int portno , socketFd ;
+struct sockaddr_in serv_addr;
+
+void error(string msg)
 {
-case
+	cout<<msg<<endl;
+	exit(ERROR_CODE);
+
 }
 
 
@@ -29,19 +37,18 @@ int main( int argc, char* argv[] )
   {
     if (argc != ARGS)
     {
-        cout<<"Usage: srftp server-port max-file-size"<<endl;
-        exit(-1);
+    	error("Usage: srftp server-port max-file-size");
+
     }
 
 
-    MAX_FILE_SIZE = atoi(argv[MAX_FILE_SIZE_IDX]);
-    if (MAX_FILE_SIZE <=0)
+    maxFileSize = atoi(argv[MAX_FILE_SIZE_IDX]);
+    if (maxFileSize <=0)
     {
-
+    	//TODO:s
 
     }
-	int portno , socketFd ;
-	struct sockaddr_in serv_addr;
+
 
 //	char buff[BUFF_SIZE];
 	//memset(buff,'0',sizeof(buff));
@@ -135,7 +142,7 @@ void* fetchData(void* fd)
     //get size of file & verify its valid.
     rcvBuff(sizeBuff, sizeof(int), connectionFd);
     intSize = *(int*)sizeBuff;
-    if (intSize > MAX_FILE_SIZE)
+    if (intSize > maxFileSize)
     {
      //TODO: error
     }
@@ -144,7 +151,7 @@ void* fetchData(void* fd)
     if (!outFile){
         delete sizeBuff;
         delete fileNameBuff;
-        pthread_exit(-1)
+        error("");
     }
     //fetch the file.
     writeFile(&outFile, intSize, connectionFd);

@@ -3,33 +3,58 @@ Moshe Mandel (301117800), Gilad Ovits (300604493)
 EX: 4
 
 FILES:
-
+clftp.			the client side 
+srftp.			the server side
+performance.jpg		image with graph describing performance
 Makefile		the makefile for the exercise.
 README			this file.
 
 REMARKS:
-the protocol we chose is: [name size,file name,file size , file content].
+the protocol we chose is (client): [send name size ,send file name, send file size, get confirmation , file content].
 
 ANSWERS:
 1. Reliable file transfer protocol over UDP connection.
-	The two main unreliablety problems that the UDP protocol has are 
+	The two main unreliability problems that the UDP protocol has are 
 a. the possibility that some packages will be lost, 
 b. the possibility that the ordering of packages will be changed.
 to resolve those issues we define a new protocol:
-For the protocol we predefine several things: A. We ennumurate the packages and adding a header of the package number to each packet the client sends. B. we set a reasonable timeout time . C. we define signals to begin/end of transmittion.
+For the protocol we predefine several things: A. We enumerate the packages and adding a header
+ of the package number to each packet the client sends. B. we set a reasonable timeout time .
+ C. we define signals to begin/end of transmission.
 D. we define a confirmation message for a package to be that package number.
 
 The client side:
-When the client is ready to send the file, he sends a packet contains a predefined beginning signal and wait for confirmation from server. If timout time has passed, it tries again.
-When it finally gets the confirmation, it sends the ennumurated packets and listens to the confirmation packets in between. If it timeout time has passed since some packet was sent and didnt recieved a folowing confirmation, it waits to get from the server the packet number thet is missing and continues from there.
+When the client is ready to send the file, he sends a packet contains a predefined beginning
+ signal and wait for confirmation from server. If timeout time has passed, it tries again.
+When it finally gets the confirmation, it sends the enumerated packets and listens to the
+ confirmation packets in between. If it timeout time has passed since some packet was sent
+ and didn’t received a following confirmation, it waits to get from the server the packet 
+number that is missing and continues from there.
 The server side:
-The server is listening and waits to the beginning signal and from this point it counts for timeout from each packet recived. then it fetches each packet and verifies that its header is the next to the last one. if it is, it sends a confirmation message(the file's number). if it didnt get some packet, it sends a request for resending this packet every timeout until getting the packet and not responding anything else. if a package has been recieved before timeout but out of order, it reorderes the packets by the header. an ordered sequence starting from beginning (or last save) may be saved.
+The server is listening and waits to the beginning signal and from this point it counts for
+ timeout from each packet received. then it fetches each packet and verifies that its header
+ is the next to the last one. if it is, it sends a confirmation message(the file's number).
+ if it didn’t get some packet, it sends a request for resending this packet every timeout 
+until getting the packet and not responding anything else. if a package has been received
+ before timeout but out of order, it reordered the packets by the header. an ordered sequence
+ starting from beginning (or last save) may be saved.
 
-this solution verifies that there will be no lost packets since any packet not recieved will stop the message from comming until it is recived. 
-In addition, this solution is taking care of package order by demanding continus and sequentual packets to be recieved.
-If some package is been recieved out of order it can be reordered very efficiantly (can do in nLog(n))).
-Efficientcy:
-This is efficient protocol because in case of packets are OK the transmission is undesturbed.
+this solution verifies that there will be no lost packets since any packet not received will stop
+ the message from coming until it is received. 
+In addition, this solution is taking care of package order by demanding continues and sequential
+ packets to be received.
+If some package is been received out of order it can be reordered very efficiently (can do in nLog(n))).
+Efficiency:
+This is efficient protocol because in case of packets are OK the transmission is undisturbed.
 In case of ordering issue the server keeps the preceding packets, and just reorders them locally.
-In case of missed file the server will wait timeout time, and ask for the missing packet. In such case the client simply sends the packet again and evrything continue to run. the only case that things stop running is if the client didnt get several of such repeat demands and then the server would stop answering incoming packets untill getting it, resulting client halt.(a must for reliability).
-the differance between our TCP impementation and the proposed protocol, is vast. in out implamantation we only need to establish connection with a client and send the files. the protocol we used in the Ex sol is simply for logical transfer so we could know what packages (size and content ) to expect next. in the proposed protocol the protocol includes the part described abobve for reliabilty, IN ADDITION to what we've implemented. so it means much much more work for us...
+In case of missed file the server will wait timeout time, and ask for the missing packet. In such
+ case the client simply sends the packet again and everything continue to run. the only case that
+ things stop running is if the client didn’t get several of such repeat demands and then the server
+ would stop answering incoming packets until getting it, resulting client halt.(a must for reliability).
+the difference between our TCP implementation and the proposed protocol, is vast. in out implantation we
+ only need to establish connection with a client and send the files. the protocol we used in the Ex sol
+ is simply for logical transfer so we could know what packages (size and content ) to expect next.
+ in the proposed protocol the protocol includes the part described above for reliability, IN ADDITION
+ to what we've implemented. so it means much much more work for us...
+
+

@@ -10,7 +10,7 @@
 
 #define SUCCESS 0
 #define ERROR -1
-#define EXIT_CODE 1
+#define ERROR_CODE 1
 #define BUFF_SIZE 1024
 
 

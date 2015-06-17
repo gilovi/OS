@@ -24,7 +24,8 @@ char buffer[];
 };
 */
 
-static int MAX_FILE_SIZE ;
+
 void*  fetchData(void*);
+
 
 #endif /* SRFTP_H_ */

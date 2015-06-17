@@ -14,12 +14,4 @@
 #define BUFF_SIZE 1024
 
 
-int _sPort;
-int _serverSocket;
-int _nameSize;
-int _fileSize;
-char* _fileToTransfer;
-char* _fileToSave;
-
-
 #endif /* GENERAL_H_ */

@@ -46,7 +46,7 @@ void Clftp::sendBuff(const char* buffer , int bufferSize )
 	int sent = 1;
 
 	while (bytesSent<bufferSize){
-		sent = send(_socketFd, buffer + bytesSent, bufferSize - bytesSent,0);
+		sent = write(_socketFd, buffer + bytesSent, bufferSize - bytesSent);
 		if (sent == ERROR)
 		{
 		//TODO:	error ("ERROR: reciving data");

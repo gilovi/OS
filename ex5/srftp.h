@@ -8,6 +8,10 @@
 #ifndef SRFTP_H_
 #define SRFTP_H_
 
+#define PORT_IDX 1
+#define MAX_FILE_SIZE_IDX 2
+#define ARGS 3
+
 /*
 class srftp {
 public:
@@ -19,9 +23,8 @@ int portNum, maxFileSize;
 char buffer[];
 };
 */
-#define BUFF_SIZE 1024
-static int connectionFd;
 
+static int MAX_FILE_SIZE ;
 void*  fetchData(void*);
 
 #endif /* SRFTP_H_ */

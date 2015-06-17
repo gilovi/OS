@@ -8,7 +8,18 @@
 #ifndef GENERAL_H_
 #define GENERAL_H_
 
+#define SUCCESS 0
+#define ERROR -1
+#define EXIT_CODE 1
+#define BUFF_SIZE 1024
 
+
+int _sPort;
+int _serverSocket;
+int _nameSize;
+int _fileSize;
+char* _fileToTransfer;
+char* _fileToSave;
 
 
 #endif /* GENERAL_H_ */

@@ -18,33 +18,39 @@
 #include <fstream>
 
 using namespace std;
-/*srftp::srftp() {
-	// TODO Auto-generated constructor stub
 
+void error(int err)
+{
+case
 }
-
-srftp::~srftp() {
-	// TODO Auto-generated destructor stub
-}*/
-
-
-//memset(&my_addr, 0, sizeof(struct sockaddr_un));
-
 
 
 int main( int argc, char* argv[] )
-
   {
+    if (argc != ARGS)
+    {
+        cout<<"Usage: srftp server-port max-file-size"<<endl;
+        exit(-1);
+    }
 
 
-	int portno , socketFd  ;
-	int livingClients = 0;
+    MAX_FILE_SIZE = atoi(argv[MAX_FILE_SIZE_IDX]);
+    if (MAX_FILE_SIZE <=0)
+    {
+
+
+    }
+	int portno , socketFd ;
 	struct sockaddr_in serv_addr;
 
-	char buff[BUFF_SIZE];
-	memset(buff,'0',sizeof(buff));
+//	char buff[BUFF_SIZE];
+	//memset(buff,'0',sizeof(buff));
 
 	portno = atoi(argv[1]);
+	if (portno < 1 || portno > 65535)
+    {
+
+    }
 	socketFd = socket(AF_INET, SOCK_STREAM, 0);
 	     if (socketFd < 0)
 	     {
@@ -63,51 +69,86 @@ int main( int argc, char* argv[] )
 
 	while(true)
 	{
-	connectionFd = accept(socketFd,NULL,NULL);
-	if (connectionFd < 0)
+    int* connectionFd = new int;
+	*connectionFd = accept(socketFd,NULL,NULL);
+	if (*connectionFd < 0)
 	{
 		//TODO: error hand
 
 	}
+
 	pthread_t tid;
-	pthread_create(&tid, NULL, fetchData, NULL);
+	pthread_create(&tid, NULL, fetchData, connectionFd);
 	pthread_detach (tid);
 	}
 
   }
-void rcvBuff(char* buffer , int bufferSize)
+void rcvBuff(char* buffer , int bufferSize , int connectionFd)
 {
 	int bytesGot = 0;
 	int got = 1;
 
-		while (bytesGot<bufferSize){
-			 got = read(connectionFd, buffer + bytesGot, bufferSize - bytesGot);
-			if (got < 0 )
-			{
-			//TODO:error ha
-			}
-			bytesGot += got;
-		}
+    while (bytesGot < bufferSize){
+         got = read(connectionFd, buffer + bytesGot, bufferSize - bytesGot);
+        if (got < 0 )
+        {
+        //TODO:error ha
+        }
+        bytesGot += got;
+    }
+    //buffer[bufferSize+1] = '\0';
 }
 
- void rcvFile(ofstream* writeTo, int sizeOfFile)
+ void writeFile(ofstream* writeTo, int sizeOfFile , int connectionFd)
  {
-	 char buff[BUFF_SIZE] =
+	 char* buff = new char[BUFF_SIZE];
 	 int i = sizeOfFile/BUFF_SIZE;
-	 int reminder =  sizeOfFile % BUFF_SIZE;
+	 int remainder =  sizeOfFile % BUFF_SIZE;
 
 	 for(i; i>0; i--)
 	 {
-		 rcvBuff()
-
+		 rcvBuff(buff, BUFF_SIZE, connectionFd);
+		 writeTo->write(buff, BUFF_SIZE) ;
 	 }
+	 rcvBuff(buff, remainder, connectionFd);
+     writeTo->write(buff, remainder) ;
 
+
+    delete(buff);
  }
 
 
-void* fetchData(void* p)
+void* fetchData(void* fd)
 {
+    int connectionFd = *(int*) fd;
+    delete fd;
 
+    char* sizeBuff = new char[sizeof(int)];
+    int intSize;
+
+    //fetch file name size & then the name
+    rcvBuff(sizeBuff, sizeof(int), connectionFd);
+    intSize = *(int*)sizeBuff;
+    char* fileNameBuff = new char[intSize + 1];
+    rcvBuff(fileNameBuff, intSize, connectionFd);//TODO: +1?? from the client last year
+    fileNameBuff[intSize + 1] = '\0';
+    //get size of file & verify its valid.
+    rcvBuff(sizeBuff, sizeof(int), connectionFd);
+    intSize = *(int*)sizeBuff;
+    if (intSize > MAX_FILE_SIZE)
+    {
+     //TODO: error
+    }
+
+    ofstream outFile(fileNameBuff, ios::app);
+    if (!outFile){
+        delete sizeBuff;
+        delete fileNameBuff;
+        pthread_exit(-1)
+    }
+    //fetch the file.
+    writeFile(&outFile, intSize, connectionFd);
+
+    delete sizeBuff;
+    delete fileNameBuff;
 }
-
-

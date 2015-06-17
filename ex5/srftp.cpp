@@ -33,7 +33,7 @@ void error(string msg)
 }
 
 
-int main( int argc, char* argv[] )
+int mainc( int argc, char* argv[] )
   {
     if (argc != ARGS)
     {
@@ -112,14 +112,16 @@ void rcvBuff(char* buffer , int bufferSize , int connectionFd)
 	 int i = sizeOfFile/BUFF_SIZE;
 	 int remainder =  sizeOfFile % BUFF_SIZE;
 
-	 for(i; i>0; i--)
+	 for(; i > 0 ; i--)
 	 {
 		 rcvBuff(buff, BUFF_SIZE, connectionFd);
 		 writeTo->write(buff, BUFF_SIZE) ;
 	 }
+	 if (remainder)
+	 {
 	 rcvBuff(buff, remainder, connectionFd);
      writeTo->write(buff, remainder) ;
-
+     }
 
     delete(buff);
  }
@@ -128,7 +130,7 @@ void rcvBuff(char* buffer , int bufferSize , int connectionFd)
 void* fetchData(void* fd)
 {
     int connectionFd = *(int*) fd;
-    delete fd;
+    delete (int*)fd;
 
     char* sizeBuff = new char[sizeof(int)];
     int intSize;
@@ -156,6 +158,9 @@ void* fetchData(void* fd)
     //fetch the file.
     writeFile(&outFile, intSize, connectionFd);
 
+    outFile.close();
     delete sizeBuff;
     delete fileNameBuff;
+
+    return 0;
 }

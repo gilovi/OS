@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
-#include <string>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -22,32 +22,27 @@
 #include <unistd.h>
 
 
+
 #define PORT_IDX 1
 #define HOST_IDX 2
 #define FILE_NAME_IDX 3
 #define OUT_FILE_NAME_IDX 4
-
+#define ARGS 5
 
 
 class Clftp {
 public:
-	Clftp::Clftp(int port, struct hostent* host, std::string sourceFileName, std::string saveFileName);
-	virtual ~Clftp();
+	Clftp(int port, struct hostent* host);
+    ~Clftp();
+	void sendFile(std::string localName , std::string remoteName );
 
 private:
-	void sendBuff(char* buffer , int bufferSize );
-	void sendFile(std::ifstream& toSend);
+	void sendBuff(const char* buffer , int bufferSize );
+	void sendFile(std::ifstream& toSend, int fileSize);
 	int getFileSize(std::ifstream &ifs) ;
 
-	int connect();
-
 	int _portno;//
-	char* _fileNameToSend;//
-	char* _nameToSave;//
-	int _nameSize;
-
-	int _SocketFd;//
-	int _fileSize;
+	int _socketFd;//
 
 	struct sockaddr_in serv_addr;
 	struct hostent *server ;//

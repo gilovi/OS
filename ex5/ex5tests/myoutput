@@ -1,0 +1,33 @@
+**test result**
+
+server:
+negtive port:
+Usage: srftp server-port max-file-size
+zero port:
+Usage: srftp server-port max-file-size
+big port:
+Usage: srftp server-port max-file-size
+too big port:
+Usage: srftp server-port max-file-size
+zero size:
+Usage: srftp server-port max-file-size
+negtive size:
+Usage: srftp server-port max-file-size
+lake in args:
+Usage: srftp server-port max-file-size
+
+client:
+negtive port:
+Usage: clftp server-port server-hostname file-to-transfer filename-in-server
+zero port:
+Usage: clftp server-port server-hostname file-to-transfer filename-in-server
+big port:
+Usage: clftp server-port server-hostname file-to-transfer filename-in-server
+too big port:
+Usage: clftp server-port server-hostname file-to-transfer filename-in-server
+lake in args:
+Usage: clftp server-port server-hostname file-to-transfer filename-in-server
+file_not_exists:
+Usage: clftp server-port server-hostname file-to-transfer filename-in-server
+
+**test end**

@@ -1,0 +1,33 @@
+echo "**test result**" > testerrorsoutput
+echo "" >> testerrorsoutput
+echo "server:" >> testerrorsoutput
+echo "negtive port:" >> testerrorsoutput
+./srftp -10 10 >> testerrorsoutput
+echo "zero port:" >> testerrorsoutput
+./srftp 0 10 >> testerrorsoutput
+echo "big port:" >> testerrorsoutput
+./srftp 65536 10 >> testerrorsoutput
+echo "too big port:" >> testerrorsoutput
+./srftp 70000 10 >> testerrorsoutput
+echo "negtive size:" >> testerrorsoutput
+./srftp 10 -1 >> testerrorsoutput
+echo "lake in args:" >> testerrorsoutput
+./srftp 10 >> testerrorsoutput
+echo "" >> testerrorsoutput
+echo "client:" >> testerrorsoutput
+echo "negtive port:" >> testerrorsoutput
+./clftp -10 xx ftest1 stest1 >> testerrorsoutput
+echo "zero port:" >> testerrorsoutput
+./clftp 0 xx ftest1 stest1 >> testerrorsoutput
+echo "big port:" >> testerrorsoutput
+./clftp 65536 xx ftest1 stest1 >> testerrorsoutput
+echo "too big port:" >> testerrorsoutput
+./clftp 70000 xx ftest1 stest1 >> testerrorsoutput
+echo "lake in args:" >> testerrorsoutput
+./clftp xx ftest1 stest1 >> testerrorsoutput
+echo "file_not_exists:" >> testerrorsoutput
+./clftp 2000 xx file_not_exists stest1 >> testerrorsoutput
+
+echo "" >> testerrorsoutput
+echo "**test end**" >> testerrorsoutput
+

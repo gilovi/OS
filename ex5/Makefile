@@ -1,10 +1,10 @@
-
+CC=g++
 HDRS = general.h clftp.h srftp.h
 SRCS = srftp.cpp clftp.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 INCS = -I.
-CFLAGS = -std=c++11 -Wall -g -O0 $(INCS)
+CFLAGS = -std=c++11 -Wall -g $(INCS)
 LIBS = -lpthread
 LOADLIBS = -L.
 
@@ -13,10 +13,10 @@ TARFLAGS=-cvf
 TARNAME=ex5.tar
 TARSRCS=$(SRCS) $(HDRS) Makefile README
 
-all : server
+all : server client
 
 server :
-	$(CC) $(CFLAGS) srftp.cpp -o srftp
+	$(CC) $(CFLAGS) srftp.cpp -o srftp $(LIBS)
 
 client : 
 	$(CC) $(CFLAGS) clftp.cpp -o clftp

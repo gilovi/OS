@@ -20,7 +20,10 @@
 #include "cache.h"
 #include <unistd.h>
 #include <fstream>
-<<<<<<< HEAD
+
+#define ISDIR(path) (stat(path, &sb) == 0 && S_ISDIR(sb.st_mode))
+#define INPUT_ERR "usage: CachingFileSystem rootdir mountdir numberOfBlocks blockSize\n"
+#define MAIN_ERR "System Error"
 
 using namespace std;
 #define LOG_CALL_CHECK(path) if(!strcmp(path, "/.filesystem.log")) return -ENOENT
@@ -44,7 +47,7 @@ struct CacheData
 	}
 };
 CacheData* gData;
-#define INPUT_ERR "usage: CachingFileSystem rootdir mountdir numberOfBlocks blockSize\n"
+
 struct fuse_operations caching_oper;
 static void fullpath(char fpath[PATH_MAX],const char *path)
 {
@@ -66,9 +69,7 @@ int caching_getattr(const char *path, struct stat *statbuf){
 	int ret = 0;
 
 	char fpath[PATH_MAX];
-	// TODO: remove
-//	std::cout<<"in caching_getattr"<<std::endl;
-	// TODO: log
+
 	fullpath(fpath,path);
 	ret = lstat(fpath, statbuf);
 	if(0!= ret)
@@ -77,7 +78,6 @@ int caching_getattr(const char *path, struct stat *statbuf){
 		ret = -errno;
 
 	}
-	// TODO: log2
 	return ret;
 }
 /**
@@ -96,16 +96,14 @@ int caching_fgetattr(const char *path, struct stat *statbuf, struct fuse_file_in
 	log_msg("fgetattr");
 	int ret = 0;
 	char fpath[PATH_MAX];
-	// TODO: remove
-//	std::cout<<"in caching_fgetattr"<<std::endl;
-	// TODO: log
+
 	fullpath(fpath,path);
 	ret = fstat(fi->fh, statbuf);
 	if (0!=ret)
 	{
 		ret = -errno;
 	}
-	// TODO: log2
+
 	return ret;
 }
 /**
@@ -129,9 +127,7 @@ int caching_access(const char *path, int mask)
 
 	int ret = 0;
 	char fpath[PATH_MAX];
-	// TODO: remove
-//	std::cout<<"in caching_access"<<std::endl;
-	// TODO: log
+
 	fullpath(fpath, path);
 	ret = access(fpath,mask);
 	if (ret < 0)
@@ -153,10 +149,9 @@ int caching_access(const char *path, int mask)
  */
 int caching_open(const char *path, struct fuse_file_info *fi){
 
-	// TODO: remove
 	log_msg("open");
 	LOG_CALL_CHECK(path);
-//	std::cout<<"in caching_open"<<std::endl;
+
 	int retstat = 0;
 	int fd;
 	char fpath[PATH_MAX];
@@ -164,8 +159,6 @@ int caching_open(const char *path, struct fuse_file_info *fi){
 	fd = open(fpath, fi->flags);
 	if (fd < 0)
 	{
-		// TODO: fix error
-
 		retstat = -errno;
 	}
 	fi->fh = fd;
@@ -183,11 +176,7 @@ int caching_read(const char *path, char *buf, size_t size, off_t offset,
 		struct fuse_file_info *fi){
 	log_msg("read");
 
-	// TODO: remove
-//	std::cout<<"in caching_read"<<std::endl;
-
 	int ret = 0;
-	// TODO: log
 	ret = gData->cache.read(path,buf,size,offset,fi->fh);
 	if (ret<0)
 	{
@@ -221,12 +210,7 @@ int caching_read(const char *path, char *buf, size_t size, off_t offset,
 int caching_flush(const char *path, struct fuse_file_info *fi)
 {
 	log_msg("flush");
-<
-	// TODO: remove
-//	std::cout<<"in caching_flush"<<std::endl;
-
 	int ret = 0;
-	// TODO: log
 	return ret;
 }
 /** Release an open file
@@ -244,17 +228,12 @@ int caching_flush(const char *path, struct fuse_file_info *fi)
  * Changed in version 2.2
  */
 int caching_release(const char *path, struct fuse_file_info *fi){
-<<<<<<< HEAD
+
     log_msg("release");
 
-//	TODO: remove
-	std::cout<<"in caching_release"<<std::endl;
-
-
 	int ret = 0;
-	// TODO: log
 	ret = close(fi->fh);
-	// TODO: release from cache?
+
 	return ret;
 }
 /** Open directory
@@ -268,8 +247,6 @@ int caching_opendir(const char *path, struct fuse_file_info *fi){
 
 	log_msg("opendir");
 	LOG_CALL_CHECK(path);
-	// TODO: remove
-//	std::cout<<"in caching_opendir"<<std::endl;
 
 	DIR *dp;
 	int retstat = 0;
@@ -300,18 +277,14 @@ int caching_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t o
 		struct fuse_file_info *fi){
 
 	log_msg("readdir");
-	// TODO: remove
-//	std::cout<<"in caching_readdir"<<std::endl;
 
 	int retstat = 0;
 	DIR *dp;
 	struct dirent *de;
 	dp = (DIR *) (uintptr_t) fi->fh;
 	de = readdir(dp);
-	if (de == 0) {
-
-		// TODO: fix error
-
+	if (de == 0)
+	{
 		retstat = -errno;
 		return retstat;
 	}
@@ -331,11 +304,8 @@ int caching_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t o
 int caching_releasedir(const char *path, struct fuse_file_info *fi){
 
 	log_msg("releasedir");
-	// TODO: remove
-//	std::cout<<"in caching_releasedir"<<std::endl;
 
 	int ret = 0;
-	// TODO: log
 	closedir((DIR*) (uintptr_t)fi->fh);
 	return ret;
 }
@@ -344,13 +314,11 @@ int caching_rename(const char *path, const char *newpath){
 
 	log_msg("rename");
 	LOG_CALL_CHECK(path);
-	// TODO: remove
-//	std::cout<<"in caching_rename"<<std::endl;
+
 	int ret = 0;
 
 	char fpath[PATH_MAX];
 	char fnewpath[PATH_MAX];
-	// TODO: log
 	fullpath(fpath,path);
 	fullpath(fnewpath,newpath);
 	// update cache:
@@ -375,9 +343,6 @@ int caching_rename(const char *path, const char *newpath){
 void *caching_init(struct fuse_conn_info *conn){
 
 	log_msg("init");
-	// TODO: remove
-//	std::cout<<"in caching_init"<<std::endl;
-	// TODO: log
 
 	return gData;
 }
@@ -391,12 +356,9 @@ void *caching_init(struct fuse_conn_info *conn){
 void caching_destroy(void *userdata){
 
 	log_msg("destroy");
-	logfile.close();
-	// TODO: remove
-//	std::cout<<"in caching_destroy"<<std::endl;
+	logFile.close();
 
 	delete gData;
-	// TODO: log
 }
 /**
  * Ioctl from the FUSE sepc:
@@ -416,8 +378,6 @@ int caching_ioctl (const char *, int cmd, void *arg,
 
 	log_msg("ioctl");
 	gData->cache.PrintToLog(logFile);
-	// TODO: remove
-//	std::cout<<"in caching_ioctl"<<std::endl;
 
 	return 0;
 }
@@ -439,6 +399,7 @@ void init_caching_oper()
 	caching_oper.destroy = caching_destroy;
 	caching_oper.ioctl = caching_ioctl;
 	caching_oper.fgetattr = caching_fgetattr;
+
 	caching_oper.readlink = NULL;
 	caching_oper.getdir = NULL;
 	caching_oper.mknod = NULL;
@@ -464,29 +425,48 @@ void init_caching_oper()
 }
 //basic main. You need to complete it.
 int main(int argc, char* argv[]){
-	gData = new CacheData();
-	gData->rootdir = realpath(argv[1],NULL);
+
+	if (argc!=5)
+	{
+		cout << INPUT_ERR << endl;
+	}
+	char tmpRoot[PATH_MAX], tmpMount[PATH_MAX];
+    if(realpath(argv[1], tmpRoot) == NULL)
+	{
+		return -errno;
+	}
+    if(realpath(argv[2], tmpMount) == NULL)
+    {
+    	return -errno;
+    }
 	int numOfBlocks = atoi(argv[3]);
 	size_t blockSize = atoi(argv[4]);
+
+    struct stat sb;
+    if (ISDIR(tmpRoot) == 0 || ISDIR(tmpMount) == 0 ||numOfBlocks <=0 || blockSize <= 0)
+    {
+    	cout << INPUT_ERR << endl;
+    }
+
+	gData = new CacheData();
+	gData->rootdir = tmpRoot;
 	gData->cache = Cache(blockSize, numOfBlocks);
-	// gData->cache.setBlockSize(blockSize);
-	// gData->cache.setNumOfBlocks(numOfBlocks);
+
 	init_caching_oper();
 	argv[1] = argv[2];
 	for (int i = 2; i< (argc - 1); i++){
 		argv[i] = NULL;
 	}
-	// TODO: remove -f flag
+
 	argv[2] = (char*) "-s";
-	argv[3] = (char*) "-f";
-	argc = 4;
+
+	argc = 3;
 
 	char logPath[PATH_MAX];
-	ogFile.open(logPath, ios::app);
+
 	strcpy(logPath,gData->rootdir);
 	strncat(logPath,"/.filesystem.log",PATH_MAX);
-//	char* logPath = gData->rootdir + "/.filesystem.log";
-	logfile.open(logPath, ios::app);
+	logFile.open(logPath, ios::app);
 
 	int fuse_stat = fuse_main(argc, argv, &caching_oper, gData);
 	return fuse_stat;

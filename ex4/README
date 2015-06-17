@@ -3,11 +3,22 @@ Moshe Mandel (301117800), Gilad Ovits (300604493)
 EX: 4
 
 FILES:
-
+CachingFileSystem.cpp	functions for fuse_system.
+cache.h/cpp		implementation of cache
 Makefile		the makefile for the exercise.
 README			this file.
 
 REMARKS:
+We have implemented all functions except read and rename similar to the way implemented in 
+bbfc.c (big brother). Our read function is passed to the read function of the read, where
+the various computations are made. We have done this for encapsulation reasons. Our rename
+function is implemented in the same manner. Since we use strings as keys, we use the regex
+library (available from c++11) in order to modify the appropriate string.
+Having built the Cache class, lets us do all the relevant inside this class. This results
+in a cleaner code in CachingFileSystem.cpp.
+We have implemented the LFU algorithm via a list-based method, allowing us to access the
+LFU block in constant time but costing us the maintenance of the list at time relative to 
+the input. 
 
 ANSWERS:
 

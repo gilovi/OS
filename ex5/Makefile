@@ -16,7 +16,7 @@ TARSRCS=$(SRCS) $(HDRS) performance.jpg Makefile README
 all : server client
 
 server :
-	$(CC) $(CFLAGS) srftp.cpp -o srftp $(LIBS)
+	$(CC) $(CFLAGS) $(LIBS) srftp.cpp -o srftp
 
 client : 
 	$(CC) $(CFLAGS) clftp.cpp -o clftp

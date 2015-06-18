@@ -20,10 +20,6 @@ using namespace std;
 Clftp::Clftp(int port, struct hostent* host):
 				_portno(port), server(host)
 {
-//	if (server == NULL)
-//	{
-//		//TODO: error
-//	}
 	//create a socket:
 	_socketFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_socketFd < 0)
@@ -35,12 +31,6 @@ Clftp::Clftp(int port, struct hostent* host):
 	serv_addr.sin_family = AF_INET;
 	bcopy((char *)server->h_addr,(char *)&serv_addr.sin_addr.s_addr, server->h_length);
 	serv_addr.sin_port = htons(_portno);
-	//connecting to server
-	//if (connect(_SocketFd,((struct sockaddr*)& serv_addr), sizeof(serv_addr)) < 0)
-
-//	{
-		//TODO: error("ERROR connecting");
-//	}
 
 }
 

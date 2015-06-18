@@ -12,18 +12,6 @@
 #define MAX_FILE_SIZE_IDX 2
 #define ARGS 3
 
-/*
-class srftp {
-public:
-	srftp();
-	virtual ~srftp();
-
-private:
-int portNum, maxFileSize;
-char buffer[];
-};
-*/
-
 
 void*  fetchData(void*);
 

@@ -22,7 +22,7 @@ client :
 	$(CC) $(CFLAGS) clftp.cpp -o clftp
 
 clean:
-	$(RM) $(OBJS) *.o *~ *core
+	$(RM) $(OBJS) srftp clftp *.o *~ *core
 
 tar:
 	$(TAR) $(TARFLAGS) $(TARNAME) $(TARSRCS)

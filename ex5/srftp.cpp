@@ -27,14 +27,6 @@ static int maxFileSize ;
 int portno , socketFd ;
 struct sockaddr_in serv_addr;
 
-//void error(string msg)
-//{
-//	cout<<msg<<endl;
-//	exit(ERROR_CODE);
-//
-//}
-
-
 int main( int argc, char* argv[] )
 {
 	//	invalid number of parameters
@@ -52,10 +44,6 @@ int main( int argc, char* argv[] )
 		cout << USAGE_ERR << endl;
 		exit(ERROR_CODE);
 	}
-
-
-	//	char buff[BUFF_SIZE];
-	//memset(buff,'0',sizeof(buff));
 
 
 	portno = atoi(argv[1]);
@@ -118,7 +106,7 @@ void rcvBuff(char* buffer , int bufferSize , int connectionFd)
 		}
 		bytesGot += got;
 	}
-	//buffer[bufferSize+1] = '\0';
+	buffer[bufferSize+1] = '\0';
 }
 
 void writeFile(ofstream* writeTo, int sizeOfFile , int connectionFd)
@@ -166,11 +154,10 @@ void* fetchData(void* fd)
 	}
 	write(connectionFd,(char*)&response,sizeof(int) );
 
-	ofstream outFile(fileNameBuff, ios::app);
+	ofstream outFile(fileNameBuff);
 	if (!outFile){
 		delete[] sizeBuff;
 		delete[] fileNameBuff;
-	//	error("");
 	}
 	//fetch the file.
 	writeFile(&outFile, intSize, connectionFd);

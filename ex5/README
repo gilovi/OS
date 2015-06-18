@@ -10,7 +10,8 @@ Makefile		the makefile for the exercise.
 README			this file.
 
 REMARKS:
-the protocol we chose is (client): [send name size ,send file name, send file size, get confirmation , file content].
+the protocol we chose is (client): [send name size ,send file name, send file size, 
+													get confirmation , file content].
 
 ANSWERS:
 1. Reliable file transfer protocol over UDP connection.

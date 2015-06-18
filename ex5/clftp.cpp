@@ -11,11 +11,17 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+//TODO: remove
+#include <sys/time.h>
+#include <cmath>
+
 #define USAGE_ERR "Usage: clftp server-port server-hostname file-to-transfer filename-in-server"
 #define TRANS_ERR "Transmission failed: too big file"
 
 using namespace std;
 
+//TODO: remove
+int gFileSize = 0;
 
 Clftp::Clftp(int port, struct hostent* host):
 				_portno(port), server(host)
@@ -80,6 +86,8 @@ void Clftp::sendFile(string localName , string remoteName )
 		cerr << sysErr("open", err) << endl;
 	}
 	fileSize = int(getFileSize(ifs));
+//	TODO: remove
+	gFileSize = fileSize;
 	nameSize = remoteName.length();
 
 	sendBuff((char*)&nameSize,sizeof(int)); //sending the size of the name size
@@ -128,6 +136,8 @@ void Clftp::sendFile(ifstream& toSend , int fileSize)
 
 int main( int argc, char* argv[] )
 {
+
+
 	if (argc != ARGS)
 	{
 		cout<< USAGE_ERR << endl;
@@ -148,8 +158,38 @@ int main( int argc, char* argv[] )
 		cout << USAGE_ERR <<endl;
 		exit(ERROR_CODE);
 	}
-	Clftp client = Clftp(portno, gethostbyname(argv[HOST_IDX]) );
-	client.sendFile(fileToTransPath, argv[OUT_FILE_NAME_IDX] );
+//	TODO: remove
+
+		ofstream out;
+		out.open("client_out",ios::app);
+
+
+		double avgRunningTime = 0;
+		double runningTime;
+		int iterations = 10;
+		for (int i = 0; i< iterations; i++)
+		{
+			timeval t1 = {0}, t2 = {0}, res = {0};
+			runningTime = 0;
+			gettimeofday(&t1, NULL);
+//		TODO: don't remove
+			Clftp client = Clftp(portno, gethostbyname(argv[HOST_IDX]) );
+			client.sendFile(fileToTransPath, argv[OUT_FILE_NAME_IDX] );
+//		TODO: remove
+			gettimeofday(&t2, NULL);
+			timersub(&t2,&t1, &res);
+			runningTime= res.tv_sec*pow(10.0,6) + res.tv_usec; //total time in micro-seconds
+			avgRunningTime += runningTime;
+		}
+		avgRunningTime /= iterations;
+
+		cout << "file size[MB]: " << gFileSize/pow(10.0,6)<< endl;
+		cout << "running time [sec]: " << avgRunningTime/pow(10.0,6) << endl;
+
+		out << "file size[MB]: " << gFileSize/pow(10.0,6) << endl;
+		out << "running time [sec]: " << runningTime/pow(10.0,6) << endl;
+		out.close();
+
 	return 0;
 }
 

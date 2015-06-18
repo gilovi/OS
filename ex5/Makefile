@@ -11,7 +11,7 @@ LOADLIBS = -L.
 TAR=tar
 TARFLAGS=-cvf
 TARNAME=ex5.tar
-TARSRCS=$(SRCS) $(HDRS) Makefile README
+TARSRCS=$(SRCS) $(HDRS) performance.jpg Makefile README
 
 all : server client
 
